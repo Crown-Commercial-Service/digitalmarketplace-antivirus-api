@@ -1,0 +1,8 @@
+.git
+*
+
+!app/
+!application.py
+!config.py
+!requirements.txt
+!config/

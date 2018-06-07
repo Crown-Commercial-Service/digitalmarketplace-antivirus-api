@@ -1,0 +1,8 @@
+# Run `make freeze-requirements` to update requirements.txt
+# with package version changes made in requirements-app.txt
+
+clamd==1.0.2
+Flask==0.10.1
+Flask-Bcrypt==0.7.1
+
+git+https://github.com/alphagov/digitalmarketplace-utils.git@38.2.0#egg=digitalmarketplace-utils==38.2.0

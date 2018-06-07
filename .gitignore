@@ -1,0 +1,10 @@
+venv*
+*.pyc
+__pycache__
+version_label
+.cache
+
+# local environment customizations
+local.nix
+
+.envrc
