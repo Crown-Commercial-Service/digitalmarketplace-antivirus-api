@@ -1,0 +1,9 @@
+language: python
+python:
+  - "3.6"
+install:
+  - make requirements-dev
+script:
+  - PYTEST_ARGS='--cov=app --cov-report=term-missing' make test
+notifications:
+  email: false
