@@ -53,7 +53,11 @@ Start `clamd` if not already running (in a new console window/tab):
 clamd
 ```
 
-The antivirus API runs on port 5008.
+The antivirus API expects to connect to `clamd` over a unix socket. The location of this unix socket can be set by the
+configuration variable `DM_CLAMD_UNIX_SOCKET_PATH`. The default may be fine if you're running a system `clamd` or the
+docker image.
+
+The antivirus API itself runs on port 5008.
 
 Calls to the antivirus API require a valid bearer
 token. For development environments, this defaults to `myToken`. An example request to your local antivirus API

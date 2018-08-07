@@ -14,8 +14,8 @@ def create_app(config_name):
         configs[config_name],
     )
 
-    if not application.config['DM_AV_AUTH_TOKENS']:
-        raise Exception("No DM_AV_AUTH_TOKENS provided")
+    if not application.config['DM_ANTIVIRUS_API_AUTH_TOKENS']:
+        raise Exception("No DM_ANTIVIRUS_API_AUTH_TOKENS provided")
 
     from .main import main as main_blueprint
     from .status import status as status_blueprint

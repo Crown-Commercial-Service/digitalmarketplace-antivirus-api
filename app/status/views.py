@@ -2,11 +2,12 @@ import clamd
 from flask import request
 
 from . import status
+from ..clam import get_clamd_socket
 from dmutils.status import get_app_status, StatusError
 
 
 def get_clamd_status():
-    client = clamd.ClamdUnixSocket()
+    client = get_clamd_socket()
 
     try:
         if client.ping() == 'PONG':
