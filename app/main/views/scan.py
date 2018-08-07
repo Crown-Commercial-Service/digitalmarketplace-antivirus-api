@@ -6,6 +6,7 @@ from flask import abort, jsonify, request, current_app
 from dmutils.timing import logged_duration_for_external_request
 
 from .. import main
+from ...clam import get_clamd_socket
 
 
 @main.route('/scan', methods=['POST'])
@@ -16,7 +17,7 @@ def scan():
     file = request.files['document']
 
     try:
-        client = clamd.ClamdUnixSocket()
+        client = get_clamd_socket()
 
         with logged_duration_for_external_request(service='ClamAV', description='instream scan via unix socket'):
             scan_result = client.instream(BytesIO(file.stream.read()))['stream']

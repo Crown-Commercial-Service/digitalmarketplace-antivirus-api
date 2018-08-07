@@ -14,26 +14,27 @@ class Config:
     DM_LOG_LEVEL = 'DEBUG'
     DM_PLAIN_TEXT_LOGS = False
     DM_LOG_PATH = None
-    DM_APP_NAME = 'antivirus'
+    DM_APP_NAME = 'antivirus-api'
 
-    # Feature Flags
-    RAISE_ERROR_ON_MISSING_FEATURES = True
+    DM_CLAMD_UNIX_SOCKET_PATH = "/var/run/clamav/clamd.ctl"
 
     VCAP_SERVICES = None
 
 
 class Test(Config):
-    SERVER_NAME = '127.0.0.1:5100'
+    SERVER_NAME = '127.0.0.1:5008'
     DEBUG = True
     DM_PLAIN_TEXT_LOGS = True
-    DM_ANTIVIRUS_AUTH_TOKENS = 'myToken'
+    DM_LOG_LEVEL = 'CRITICAL'
+
+    DM_ANTIVIRUS_API_AUTH_TOKENS = 'valid-token'
 
 
 class Development(Config):
     DEBUG = True
     DM_PLAIN_TEXT_LOGS = True
 
-    DM_ANTIVIRUS_AUTH_TOKENS = 'myToken'
+    DM_ANTIVIRUS_API_AUTH_TOKENS = 'myToken'
 
 
 class Live(Config):
