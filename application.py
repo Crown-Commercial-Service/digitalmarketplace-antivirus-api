@@ -8,7 +8,7 @@ from app import create_app
 
 
 application = create_app(os.getenv('DM_ENVIRONMENT') or 'development')
-manager = init_manager(application, 5100)
+manager = init_manager(application, 5008)
 
 
 if __name__ == '__main__':
