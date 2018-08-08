@@ -5,8 +5,8 @@ from flask import abort, jsonify, request, current_app
 
 from dmutils.timing import logged_duration_for_external_request
 
-from .. import main
-from ...clam import get_clamd_socket
+from app.main import main
+from app.clam import get_clamd_socket
 
 
 @main.route('/scan', methods=['POST'])
