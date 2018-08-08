@@ -1,9 +1,9 @@
 from flask import current_app, abort, request
 
 
-def requires_authentication(module='main'):
+def requires_authentication(module='main', scheme='Bearer'):
     if current_app.config['AUTH_REQUIRED']:
-        incoming_token = get_token_from_headers(request.headers)
+        incoming_token = get_token_from_headers(request.headers, scheme=scheme)
 
         if not incoming_token:
             abort(401, "Unauthorized; bearer token must be provided")
@@ -17,16 +17,16 @@ def token_is_valid(incoming_token, module):
 
 def get_allowed_tokens_from_config(config, module='main'):
     """Return a list of allowed auth tokens from the application config"""
-    env_variable_name = 'DM_AV_AUTH_TOKENS'
+    env_variable_name = 'DM_ANTIVIRUS_API_AUTH_TOKENS'
 
     if module == 'callbacks':
-        env_variable_name = 'DM_API_CALLBACK_AUTH_TOKENS'
+        env_variable_name = 'DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS'
 
     return [token for token in config.get(env_variable_name, '').split(':') if token]
 
 
-def get_token_from_headers(headers):
+def get_token_from_headers(headers, scheme="Bearer"):
     auth_header = headers.get('Authorization', '')
-    if auth_header[:7] != 'Bearer ':
+    if auth_header[:len(scheme) + 1] != scheme + " ":
         return None
-    return auth_header[7:]
+    return auth_header[len(scheme) + 1:]
