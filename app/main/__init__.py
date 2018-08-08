@@ -7,4 +7,4 @@ main = Blueprint('main', __name__)
 main.before_request(requires_authentication)
 
 
-from .views import scan
+from app.main.views import meta, scan
