@@ -1,10 +1,11 @@
 from flask import Blueprint
 
-from ..authentication import requires_authentication
+from app.authentication import requires_authentication
 
 main = Blueprint('main', __name__)
 
 main.before_request(requires_authentication)
 
 
-from .views import scan
+from app.main import errors
+from app.main.views import meta, scan
