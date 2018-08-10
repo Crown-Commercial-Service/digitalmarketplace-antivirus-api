@@ -1,3 +1,4 @@
+import base64
 import os
 from dmutils.status import get_version_label
 
@@ -28,6 +29,7 @@ class Test(Config):
     DM_LOG_LEVEL = 'CRITICAL'
 
     DM_ANTIVIRUS_API_AUTH_TOKENS = 'valid-token'
+    DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = base64.standard_b64encode(b'valid:callback-token')
 
 
 class Development(Config):
@@ -35,6 +37,7 @@ class Development(Config):
     DM_PLAIN_TEXT_LOGS = True
 
     DM_ANTIVIRUS_API_AUTH_TOKENS = 'myToken'
+    DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = base64.standard_b64encode(b'my:callbackToken')
 
 
 class Live(Config):
