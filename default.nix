@@ -16,6 +16,9 @@ in (with args; {
       pkgs.clamav
       pkgs.libffi
       pkgs.libyaml
+      # for lxml
+      pkgs.libxml2
+      pkgs.libxslt
       # pip requires git to fetch some of its dependencies
       pkgs.git
       # for `cryptography`

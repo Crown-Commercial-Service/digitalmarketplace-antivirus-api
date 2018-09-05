@@ -1,6 +1,8 @@
 from flask import jsonify
+from werkzeug.exceptions import default_exceptions
 
 from .main import main
+from .callbacks import callbacks
 
 
 class ValidationError(ValueError):
@@ -27,4 +29,6 @@ def generic_error_handler(e):
 
 
 for code in range(400, 599):
-    main.app_errorhandler(code)(generic_error_handler)
+    if code in default_exceptions:  # flask complains if we attempt to register a handler for status code its unaware of
+        main.app_errorhandler(code)(generic_error_handler)
+        callbacks.app_errorhandler(code)(generic_error_handler)
