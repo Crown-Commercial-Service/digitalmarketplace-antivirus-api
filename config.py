@@ -19,6 +19,11 @@ class Config:
 
     DM_CLAMD_UNIX_SOCKET_PATH = "/var/run/clamav/clamd.ctl"
 
+    DM_DEVELOPER_VIRUS_ALERT_EMAIL = "developer-virus-alert@example.com"
+    NOTIFY_TEMPLATES = {
+        "developer_virus_alert": "70986093-4f54-4b2e-883e-d88456455385",
+    }
+
     VCAP_SERVICES = None
 
 
@@ -28,16 +33,20 @@ class Test(Config):
     DM_PLAIN_TEXT_LOGS = True
     DM_LOG_LEVEL = 'CRITICAL'
 
+    DM_NOTIFY_API_KEY = "not_a_real_key-00000000-fake-uuid-0000-000000000000"
+
     DM_ANTIVIRUS_API_AUTH_TOKENS = 'valid-token'
-    DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = base64.standard_b64encode(b'valid:callback-token')
+    DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = base64.standard_b64encode(b'valid:callback-token').decode("ascii")
 
 
 class Development(Config):
     DEBUG = True
     DM_PLAIN_TEXT_LOGS = True
 
+    DM_NOTIFY_API_KEY = "not_a_real_key-00000000-fake-uuid-0000-000000000000"
+
     DM_ANTIVIRUS_API_AUTH_TOKENS = 'myToken'
-    DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = base64.standard_b64encode(b'my:callbackToken')
+    DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = base64.standard_b64encode(b'my:callbackToken').decode("ascii")
 
 
 class Live(Config):
@@ -45,6 +54,13 @@ class Live(Config):
     DEBUG = False
     DM_HTTP_PROTO = 'https'
     DM_LOG_PATH = '/var/log/digitalmarketplace/application.log'
+
+    # use of invalid email addresses with live api keys annoys Notify
+    DM_NOTIFY_REDIRECT_DOMAINS_TO_ADDRESS = {
+        "example.com": "success@simulator.amazonses.com",
+        "example.gov.uk": "success@simulator.amazonses.com",
+        "user.marketplace.team": "success@simulator.amazonses.com",
+    }
 
 
 class Preview(Live):

@@ -1,3 +1,6 @@
+import contextlib
+import mock
+
 from app import create_app
 
 
@@ -12,3 +15,9 @@ class BaseApplicationTest:
             "HTTP_AUTHORIZATION": f"Bearer {self.app.config['DM_ANTIVIRUS_API_AUTH_TOKENS']}",
         }
         return client
+
+    @contextlib.contextmanager
+    def mocked_app_logger_log(self):
+        with mock.patch.object(self.app.logger, "isEnabledFor", return_value=True):
+            with mock.patch.object(self.app.logger, "_log") as _log:
+                yield _log
