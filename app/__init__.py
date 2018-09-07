@@ -4,6 +4,8 @@ from dmutils import init_app
 
 from config import configs
 
+from app import errors
+
 
 def create_app(config_name):
     application = Flask(__name__)
