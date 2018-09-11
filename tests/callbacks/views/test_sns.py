@@ -826,7 +826,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                             "region_name": "howth-west-2",
                             "sns_message_id": "424344def",
                         },
-                        template_id=mock.ANY,
+                        template_name="developer_virus_alert",
                     ),
                 ),
                 # expected_tagset

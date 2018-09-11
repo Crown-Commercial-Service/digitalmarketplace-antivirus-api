@@ -398,7 +398,7 @@ def handle_s3_sns():
                 try:
                     notify_client.send_email(
                         current_app.config["DM_DEVELOPER_VIRUS_ALERT_EMAIL"],
-                        template_id=current_app.config["NOTIFY_TEMPLATES"]["developer_virus_alert"],
+                        template_name="developer_virus_alert",
                         personalisation={
                             "region_name": record["awsRegion"],
                             "bucket_name": s3_bucket_name,
