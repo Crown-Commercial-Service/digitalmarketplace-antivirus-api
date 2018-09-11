@@ -483,23 +483,6 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
         "Message": "The way thereof",
     }
 
-    @pytest.mark.parametrize("body_dict", (_basic_subscription_confirmation_body, _basic_notification_body,))
-    @mock.patch("validatesns.validate", autospec=True)
-    @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)
-    def test_basic_auth_failure(self, mock_handle_subscription_confirmation, mock_validate, body_dict):
-        with self.mocked_app_logger_log() as mock_app_log:
-            with requests_mock.Mocker() as rmock:
-                client = self.app.test_client()
-                res = client.post("/callbacks/sns/s3/uploaded", data=json.dumps(body_dict))
-
-                assert res.status_code == 401
-                assert mock_validate.called is False
-                assert mock_handle_subscription_confirmation.called is False
-                assert not rmock.request_history
-                assert mock_app_log.call_args_list == [
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 401})}))
-                ]
-
     @pytest.mark.parametrize("base_body_dict", (_basic_subscription_confirmation_body, _basic_notification_body,))
     @freeze_time("2018-05-05T10:00")
     @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)

@@ -1,8 +1,9 @@
-from flask import jsonify
+import json
+
+from flask import current_app, jsonify
 from werkzeug.exceptions import default_exceptions
 
 from .main import main
-from .callbacks import callbacks
 
 
 class ValidationError(ValueError):
@@ -16,19 +17,15 @@ def validation_error(e):
 
 
 def generic_error_handler(e):
-    headers = []
-    code = getattr(e, 'code', 500)
-    error = getattr(e, 'description', 'Internal error')
+    # for the most part, the default HTTPExceptions render themselves in the desired way if returned as a response. the
+    # only change we want to make is to enclose the error description in json
+    response = e.get_response()
+    response.set_data(json.dumps({"error": getattr(e, "description", "Internal error")}))
+    response.mimetype = current_app.config["JSONIFY_MIMETYPE"]
 
-    if code == 401:
-        headers = [('WWW-Authenticate', 'Bearer')]
-    elif code == 500:
-        error = "Internal error"
-
-    return jsonify(error=error), code, headers
+    return response
 
 
 for code in range(400, 599):
     if code in default_exceptions:  # flask complains if we attempt to register a handler for status code its unaware of
         main.app_errorhandler(code)(generic_error_handler)
-        callbacks.app_errorhandler(code)(generic_error_handler)
