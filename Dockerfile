@@ -1,6 +1,6 @@
 FROM digitalmarketplace/base-api:3.1.1
 
-ENV CLAMAV_VERSION 0.99
+ENV CLAMAV_VERSION 0.
 
 RUN echo "deb http://http.debian.net/debian/ stretch main contrib non-free" > /etc/apt/sources.list && \
     echo "deb http://http.debian.net/debian/ stretch-updates main contrib non-free" >> /etc/apt/sources.list && \

@@ -17,9 +17,13 @@ def token_is_valid(incoming_token, module):
 
 def get_allowed_tokens_from_config(config, module='main'):
     """Return a list of allowed auth tokens from the application config"""
-    env_variable_name = 'DM_ANTIVIRUS_API_AUTH_TOKENS'
+    env_variable_name = ""
 
-    if module == 'callbacks':
+    if module == "main":
+        env_variable_name = 'DM_ANTIVIRUS_API_AUTH_TOKENS'
+    elif module == 'callbacks':
+        # though SNS uses the "Basic" auth scheme, we can treat the payload section of the header as a single opaque
+        # token set in DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS like any normal "Bearer" tokens.
         env_variable_name = 'DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS'
 
     return [token for token in config.get(env_variable_name, '').split(':') if token]
