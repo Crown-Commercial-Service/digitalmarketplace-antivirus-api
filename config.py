@@ -8,7 +8,8 @@ class Config:
     VERSION = get_version_label(
         os.path.abspath(os.path.dirname(__file__))
     )
-    DM_ANTIVIRUS_AUTH_TOKENS = None
+    DM_ANTIVIRUS_API_AUTH_TOKENS = None
+    DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = None
     AUTH_REQUIRED = True
     DM_HTTP_PROTO = 'http'
     # Logging
