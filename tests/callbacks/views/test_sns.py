@@ -809,7 +809,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                             "region_name": "howth-west-2",
                             "sns_message_id": "424344def",
                         },
-                        template_name="developer_virus_alert",
+                        template_name_or_id="developer_virus_alert",
                     ),
                 ),
                 # expected_tagset

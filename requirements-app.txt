@@ -6,4 +6,4 @@ Flask==1.0.2
 lxml==4.2.4
 validatesns==0.1.1
 
-git+https://github.com/alphagov/digitalmarketplace-utils.git@44.0.0#egg=digitalmarketplace-utils==44.0.0
+git+https://github.com/alphagov/digitalmarketplace-utils.git@44.2.0#egg=digitalmarketplace-utils==44.2.0
