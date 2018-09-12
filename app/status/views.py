@@ -26,5 +26,7 @@ def get_clamd_status():
 
 @status.route('/_status')
 def status():
-    return get_app_status(ignore_dependencies='ignore-dependencies' in request.args,
-                          additional_checks=[get_clamd_status])
+    return get_app_status(
+        ignore_dependencies='ignore-dependencies' in request.args,
+        additional_checks_internal=[get_clamd_status],
+    )
