@@ -28,7 +28,10 @@ def callbacks_root():
 
 
 def _get_request_body_json():
-    if request.content_type.split(";")[0] != "application/json":  # allowing for an encoding following the semicolon
+    if request.content_type.split(";")[0] not in (  # allowing for an encoding following the semicolon
+        "application/json",
+        "text/plain",
+    ):
         abort(400, "Unexpected Content-Type, expecting 'application/json'")
 
     data = request.get_json()
