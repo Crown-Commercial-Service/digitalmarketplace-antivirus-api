@@ -32,9 +32,9 @@ def _get_request_body_json():
         "application/json",
         "text/plain",
     ):
-        abort(400, "Unexpected Content-Type, expecting 'application/json'")
+        abort(400, "Unexpected Content-Type, expecting 'application/json' or 'text/plain'")
 
-    data = request.get_json()
+    data = request.get_json(force=True)
 
     if data is None:
         abort(400, "Invalid JSON; must be a valid JSON object")

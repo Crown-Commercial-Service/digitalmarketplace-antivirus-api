@@ -577,9 +577,15 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 assert mock_validate.call_args_list == [((weird_body_dict,), AnySupersetOf({}))]
                 assert mock_handle_subscription_confirmation.called is False
 
+    @pytest.mark.parametrize("content_type", ("application/json", "text/plain",))
     @mock.patch("validatesns.validate", autospec=True)
     @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)
-    def test_handle_s3_sns_subscription_confirmation(self, mock_handle_subscription_confirmation, mock_validate):
+    def test_handle_s3_sns_subscription_confirmation(
+        self,
+        mock_handle_subscription_confirmation,
+        mock_validate,
+        content_type,
+    ):
         # arbitrary sentinel Response
         mock_handle_subscription_confirmation.return_value = Response("Grain supplies"), 200
 
@@ -589,7 +595,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 res = client.post(
                     "/callbacks/sns/s3/uploaded",
                     data=json.dumps(self._basic_subscription_confirmation_body),
-                    content_type="application/json",
+                    content_type=content_type,
                 )
 
                 assert res.status_code == 200
