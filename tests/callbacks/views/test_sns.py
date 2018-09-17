@@ -577,6 +577,46 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 assert mock_validate.call_args_list == [((weird_body_dict,), AnySupersetOf({}))]
                 assert mock_handle_subscription_confirmation.called is False
 
+    @pytest.mark.parametrize("message", ("mangiD", 123, None, "", "{}",))
+    @mock.patch("validatesns.validate", autospec=True)
+    @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)
+    def test_handle_s3_sns_unexpected_message(self, mock_handle_subscription_confirmation, mock_validate, message):
+        with self.mocked_app_logger_log() as mock_app_log:
+            with requests_mock.Mocker() as rmock:
+                client = self.get_authorized_client()
+                body_dict = {
+                    "MessageId": "1234321",
+                    "Type": "Notification",
+                    "Message": message,
+                }
+                res = client.post(
+                    "/callbacks/sns/s3/uploaded",
+                    data=json.dumps(body_dict),
+                    content_type="application/json",
+                    headers={"X-Amz-Sns-Subscription-Arn": "kcirtaP"},
+                )
+
+                assert res.status_code == 400
+                assert mock_app_log.call_args_list == [
+                    (
+                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "message_id": "1234321",
+                            "subscription_arn": "kcirtaP",
+                        })}),
+                    ),
+                    (
+                        (logging.WARNING, AnyStringMatching(r"Message contents didn't match "), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "message_contents": message,
+                        })}),
+                    ),
+                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 400})}))
+                ]
+                assert not rmock.request_history
+                assert mock_validate.call_args_list == [((body_dict,), AnySupersetOf({}))]
+                assert mock_handle_subscription_confirmation.called is False
+
     @pytest.mark.parametrize("content_type", ("application/json", "text/plain",))
     @mock.patch("validatesns.validate", autospec=True)
     @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)
@@ -1253,7 +1293,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 **self._basic_notification_body,
                 "TopicArn": "bull:by:the:horns:123:s3_file_upload_notification_development",
                 "Subject": "Someone uploaded a file, yeah?",
-                "Message": {
+                "Message": json.dumps({
                     "Records": [
                         {
                             "s3": {
@@ -1268,7 +1308,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                             "awsRegion": _aws_region,
                         },
                     ],
-                },
+                }),
             }
             subscription_arn = f"{body_dict['TopicArn']}:314159"
 

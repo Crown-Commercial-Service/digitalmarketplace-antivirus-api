@@ -208,7 +208,15 @@ def handle_s3_sns():
         },
     )
 
-    for record in body_dict["Message"]["Records"]:
+    try:
+        records = json.loads(body_dict["Message"])["Records"]
+    except (ValueError, KeyError, TypeError):
+        current_app.logger.warning("Message contents didn't match expected format: {message_contents!r}", extra={
+            "message_contents": body_dict.get("Message"),
+        })
+        abort(400, f"Message contents didn't match expected format")
+
+    for record in records:
         with logged_duration(
             logger=current_app.logger,
             message=lambda _: (
