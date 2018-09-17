@@ -299,7 +299,7 @@ def handle_s3_sns():
                     VersionId=s3_object_version,
                 )
 
-            file_name = _filename_from_content_disposition(s3_object["ContentDisposition"] or "")
+            file_name = _filename_from_content_disposition(s3_object.get("ContentDisposition") or "")
 
             with logged_duration(
                 logger=current_app.logger,
