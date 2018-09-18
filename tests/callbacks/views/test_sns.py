@@ -1,4 +1,6 @@
+import base64
 import contextlib
+from functools import partial
 from itertools import chain
 import json
 import logging
@@ -101,9 +103,29 @@ def null_context_manager():
     yield
 
 
+def _json_norm_compare(other, x):
+    try:
+        return json.loads(x) == other
+    except ValueError:
+        return False
+
+
 class AnyJsonEq(RestrictedAny):
     def __init__(self, other):
-        super().__init__(lambda x: json.loads(x) == other)
+        super().__init__(partial(_json_norm_compare, other))
+
+
+def _b64_norm_compare(other, x):
+    try:
+        return base64.b64decode(x.encode("ascii")).decode("utf-8") == other
+    except (TypeError, ValueError, UnicodeDecodeError, UnicodeEncodeError):
+        # if it wasn't valid base64 in one way or another, the answer is False
+        return False
+
+
+class AnyB64Eq(RestrictedAny):
+    def __init__(self, other):
+        super().__init__(partial(_b64_norm_compare, other))
 
 
 def _dict_from_tagset(tagset_seq):
@@ -112,6 +134,10 @@ def _dict_from_tagset(tagset_seq):
 
 def _tagset_from_dict(input_dict):
     return [{"Key": k, "Value": v} for k, v in input_dict.items()]
+
+
+def _b64e(value):
+    return base64.b64encode(value.encode("utf-8")).decode("ascii")
 
 
 @pytest.mark.parametrize("cd_string,expected_output", (
@@ -691,7 +717,6 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     (
                         (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus. tag "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": None,
                             "s3_bucket_name": "spade",
                             "s3_object_key": "sandman/4321-billy-winks.pdf",
                             "s3_object_version": "0",
@@ -749,11 +774,11 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 (),
                 # expected_tagset
                 {
-                    "avStatus": AnyJsonEq({
+                    "avStatus": AnyB64Eq(AnyJsonEq({
                         "result": "pass",
                         "clamdVerStr": "ClamAV 567; first watch",
                         "ts": "2010-09-08T07:06:05.040302",
-                    }),
+                    })),
                     "surprise": "tag234",
                 },
             ),
@@ -786,7 +811,6 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     (
                         (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus. tag "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": None,
                             "s3_bucket_name": "spade",
                             "s3_object_key": "sandman/4321-billy-winks.pdf",
                             "s3_object_version": "0",
@@ -860,11 +884,11 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 ),
                 # expected_tagset
                 {
-                    "avStatus": AnyJsonEq({
+                    "avStatus": AnyB64Eq(AnyJsonEq({
                         "result": "fail",
                         "clamdVerStr": "ClamAV 567; first watch",
                         "ts": "2010-09-08T07:06:05.040302",
-                    }),
+                    })),
                     "surprise": "tag234",
                 }
             ),
@@ -897,7 +921,6 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     (
                         (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus. tag "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": None,
                             "s3_bucket_name": "spade",
                             "s3_object_key": "sandman/4321-billy-winks.pdf",
                             "s3_object_version": "0",
@@ -937,7 +960,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 # initial_tagset
                 {"existing": "tag123"},
                 # concurrent_new_tagset
-                {"avStatus": '{"result":"fail","ts":"2010-09-08T07:06:04.010101"}'},
+                {"avStatus": _b64e('{"result":"fail","ts":"2010-09-08T07:06:04.010101"}')},
                 # clamd_instream_retval
                 {"stream": ("OK", "Egg two demolished",)},
                 # expected_exception
@@ -962,7 +985,6 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     (
                         (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus. tag "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": None,
                             "s3_bucket_name": "spade",
                             "s3_object_key": "sandman/4321-billy-winks.pdf",
                             "s3_object_version": "0",
@@ -1006,11 +1028,17 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                         ),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "existing_av_status": '{"result":"fail","ts":"2010-09-08T07:06:04.010101"}',
+                            "existing_av_status_raw": _b64e('{"result":"fail","ts":"2010-09-08T07:06:04.010101"}'),
                             "unapplied_av_status": AnyJsonEq({
                                 "result": "pass",
                                 "clamdVerStr": "ClamAV 567; first watch",
                                 "ts": "2010-09-08T07:06:05.040302",
                             }),
+                            "unapplied_av_status_raw": AnyB64Eq(AnyJsonEq({
+                                "result": "pass",
+                                "clamdVerStr": "ClamAV 567; first watch",
+                                "ts": "2010-09-08T07:06:05.040302",
+                            })),
                         })}),
                     ),
                     (
@@ -1026,13 +1054,13 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 # expected_notify_calls
                 (),
                 # expected_tagset
-                {"avStatus": '{"result":"fail","ts":"2010-09-08T07:06:04.010101"}'},
+                {"avStatus": _b64e('{"result":"fail","ts":"2010-09-08T07:06:04.010101"}')},
             ),
             (
                 # initial_tagset
                 {"existing": "tag123"},
                 # concurrent_new_tagset
-                {"avStatus": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"}'},
+                {"avStatus": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}')},
                 # clamd_instream_retval
                 {"stream": ("FOUND", "After him, boy!",)},
                 # expected_exception
@@ -1057,7 +1085,6 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     (
                         (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus. tag "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": None,
                             "s3_bucket_name": "spade",
                             "s3_object_key": "sandman/4321-billy-winks.pdf",
                             "s3_object_version": "0",
@@ -1101,11 +1128,17 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                         ),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "existing_av_status": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"}',
+                            "existing_av_status_raw": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}'),
                             "unapplied_av_status": AnyJsonEq({
                                 "result": "fail",
                                 "clamdVerStr": "ClamAV 567; first watch",
                                 "ts": "2010-09-08T07:06:05.040302",
                             }),
+                            "unapplied_av_status_raw": AnyB64Eq(AnyJsonEq({
+                                "result": "fail",
+                                "clamdVerStr": "ClamAV 567; first watch",
+                                "ts": "2010-09-08T07:06:05.040302",
+                            })),
                         })}),
                     ),
                     (
@@ -1121,11 +1154,11 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 # expected_notify_calls
                 (),
                 # expected_tagset
-                {"avStatus": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"}'},
+                {"avStatus": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}')},
             ),
             (
                 # initial_tagset
-                {"avStatus": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"}'},
+                {"avStatus": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}')},
                 # concurrent_new_tagset
                 None,
                 # clamd_instream_retval
@@ -1152,7 +1185,8 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     (
                         (logging.INFO, AnyStringMatching(r"Object version.*already.*avStatus.*tag.+"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"}',
+                            "existing_av_status": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"}',
+                            "existing_av_status_raw": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}'),
                             "s3_bucket_name": "spade",
                             "s3_object_key": "sandman/4321-billy-winks.pdf",
                             "s3_object_version": "0",
@@ -1171,11 +1205,11 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 # expected_notify_calls
                 (),
                 # expected_tagset
-                {"avStatus": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"}'},
+                {"avStatus": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}')},
             ),
             (
                 # initial_tagset
-                {"avStatus": '{"result":"fail","ts":"2010-09-08T07:06:04.010101"}'},
+                {"avStatus": _b64e('{"result":"fail","ts":"2010-09-08T07:06:04.010101"}')},
                 # concurrent_new_tagset
                 None,
                 # clamd_instream_retval
@@ -1202,7 +1236,8 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     (
                         (logging.INFO, AnyStringMatching(r"Object version.*already.*avStatus.*tag.+"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": '{"result":"fail","ts":"2010-09-08T07:06:04.010101"}',
+                            "existing_av_status": '{"result":"fail","ts":"2010-09-08T07:06:04.010101"}',
+                            "existing_av_status_raw": _b64e('{"result":"fail","ts":"2010-09-08T07:06:04.010101"}'),
                             "s3_bucket_name": "spade",
                             "s3_object_key": "sandman/4321-billy-winks.pdf",
                             "s3_object_version": "0",
@@ -1221,7 +1256,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 # expected_notify_calls
                 (),
                 # expected_tagset
-                {"avStatus": '{"result":"fail","ts":"2010-09-08T07:06:04.010101"}'},
+                {"avStatus": _b64e('{"result":"fail","ts":"2010-09-08T07:06:04.010101"}')},
             ),
         ),
     )

@@ -1,3 +1,4 @@
+import base64
 import datetime
 from functools import lru_cache
 from itertools import chain
@@ -165,6 +166,14 @@ def _tag_set_updated_with_value(tag_set, tag_key, tag_value):
     ))
 
 
+def _attempt_b64decode(value):
+    "Make an attempt at decoding a possibly-base64 value but fall back to None if this is not possible"
+    try:
+        return base64.b64decode(value.encode("ascii")).decode("utf-8")
+    except (TypeError, ValueError, UnicodeDecodeError, UnicodeEncodeError):
+        return None
+
+
 class UnknownClamdError(Exception):
     pass
 
@@ -256,22 +265,21 @@ def handle_s3_sns():
                     VersionId=s3_object_version,
                 )["TagSet"]
 
-            av_status_json = _tag_value_from_tag_set(tagging_tag_set, "avStatus")
+            av_status_json_raw = _tag_value_from_tag_set(tagging_tag_set, "avStatus")
 
-            if av_status_json is None:
+            if av_status_json_raw is None:
                 current_app.logger.info(
                     "Object version {s3_object_version} has no 'avStatus' tag - will scan...",
-                    extra={
-                        **base_log_context,
-                        "av_status": av_status_json,
-                    },
+                    extra=base_log_context,
                 )
             else:
                 current_app.logger.info(
-                    "Object version {s3_object_version} already has 'avStatus' tag: {av_status}",
+                    "Object version {s3_object_version} already has 'avStatus' tag: {existing_av_status!r} / "
+                    "{existing_av_status_raw!r}",
                     extra={
                         **base_log_context,
-                        "av_status": av_status_json,
+                        "existing_av_status": _attempt_b64decode(av_status_json_raw),
+                        "existing_av_status_raw": av_status_json_raw,
                     },
                 )
                 continue
@@ -351,6 +359,8 @@ def handle_s3_sns():
                 "ts": datetime.datetime.utcnow().isoformat(),
             }
             new_av_status_json = json.dumps(new_av_status, separators=(',', ':'))
+            # AWS tags have a limited character set, so we base64-encode this value
+            new_av_status_json_b64 = base64.b64encode(new_av_status_json.encode("utf-8")).decode("ascii")
 
             # Now we briefly re-check the object's tags to ensure they weren't set by something else while we were
             # scanning. Note the impossibility of avoiding all possible race conditions as S3's API doesn't allow any
@@ -368,20 +378,23 @@ def handle_s3_sns():
                     VersionId=s3_object_version,
                 )["TagSet"]
 
-            av_status_json = _tag_value_from_tag_set(tagging_tag_set, "avStatus")
+            av_status_json_raw = _tag_value_from_tag_set(tagging_tag_set, "avStatus")
 
-            if av_status_json is not None:
+            if av_status_json_raw is not None:
                 current_app.logger.warning(
-                    "Object was tagged with new 'avStatus' ({existing_av_status}) while we were scanning. "
-                    "Not applying our own 'avStatus' result ({unapplied_av_status})",
+                    "Object was tagged with new 'avStatus' ({existing_av_status_raw!r} / {existing_av_status!r}) while "
+                    "we were scanning. Not applying our own 'avStatus' result ({unapplied_av_status_raw!r} / "
+                    "{unapplied_av_status!r})",
                     extra={
-                        "existing_av_status": av_status_json,
+                        "existing_av_status_raw": av_status_json_raw,
+                        "existing_av_status": _attempt_b64decode(av_status_json_raw),
+                        "unapplied_av_status_raw": new_av_status_json_b64,
                         "unapplied_av_status": new_av_status_json,
                     },
                 )
                 continue
 
-            tagging_tag_set = _tag_set_updated_with_value(tagging_tag_set, "avStatus", new_av_status_json)
+            tagging_tag_set = _tag_set_updated_with_value(tagging_tag_set, "avStatus", new_av_status_json_b64)
 
             with log_external_request(
                 "S3",
