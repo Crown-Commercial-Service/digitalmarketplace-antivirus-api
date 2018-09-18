@@ -430,14 +430,14 @@ def _handle_s3_sns_record(record, message_id):
                     current_app.config["DM_DEVELOPER_VIRUS_ALERT_EMAIL"],
                     template_name_or_id="developer_virus_alert",
                     personalisation={
-                        "region_name": record["awsRegion"],
+                        "region_name": record.get("awsRegion") or "<unknown>",
                         "bucket_name": s3_bucket_name,
                         "object_key": s3_object_key,
                         "object_version": s3_object_version,
-                        "file_name": file_name,
+                        "file_name": file_name or "<unknown>",
                         "clamd_output": ", ".join(clamd_result),
                         "sns_message_id": message_id,
-                        "dm_trace_id": request.trace_id,
+                        "dm_trace_id": request.trace_id or "<unknown>",
                     },
                 )
             except EmailError as e:
