@@ -1060,7 +1060,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 # initial_tagset
                 {"existing": "tag123"},
                 # concurrent_new_tagset
-                {"avStatus": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}')},
+                {"avStatus": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101","mead":"Übermensch"}')},
                 # clamd_instream_retval
                 {"stream": ("FOUND", "After him, boy!",)},
                 # expected_exception
@@ -1127,8 +1127,11 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                             (),
                         ),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "existing_av_status": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"}',
-                            "existing_av_status_raw": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}'),
+                            "existing_av_status": '{"result":"pass","ts":"2010-09-08T07:06:04.010101"'
+                                                  ',"mead":"Übermensch"}',
+                            "existing_av_status_raw": _b64e(
+                                '{"result":"pass","ts":"2010-09-08T07:06:04.010101","mead":"Übermensch"}'
+                            ),
                             "unapplied_av_status": AnyJsonEq({
                                 "result": "fail",
                                 "clamdVerStr": "ClamAV 567; first watch",
@@ -1154,7 +1157,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 # expected_notify_calls
                 (),
                 # expected_tagset
-                {"avStatus": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101"}')},
+                {"avStatus": _b64e('{"result":"pass","ts":"2010-09-08T07:06:04.010101","mead":"Übermensch"}')},
             ),
             (
                 # initial_tagset
