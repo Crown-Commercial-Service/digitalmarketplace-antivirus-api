@@ -154,14 +154,22 @@ def _filename_from_content_disposition(content_disposition):
     )
 
 
-def _tag_value_from_tag_set(tag_set, tag_key):
-    return next((tag["Value"] for tag in tag_set if tag["Key"] == tag_key), None)
+def _prefixed_tag_values_from_tag_set(tag_set, prefix):
+    return {tag["Key"]: tag["Value"] for tag in tag_set if tag["Key"].startswith(prefix)}
 
 
-def _tag_set_updated_with_value(tag_set, tag_key, tag_value):
+def _tag_set_stripped_of_prefixed(tag_set, prefix):
+    return [tag for tag in tag_set if not tag["Key"].startswith(prefix)]
+
+
+# See https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/allocation-tag-restrictions.html
+_invalid_tag_chars_re = re.compile(r"[^-+=.:/\w\s]", flags=re.ASCII)
+
+
+def _tag_set_updated_with_dict(tag_set, update_dict):
     return list(chain(
-        (kv for kv in tag_set if kv["Key"] != tag_key),
-        ({"Key": tag_key, "Value": tag_value},),
+        (kv for kv in tag_set if kv["Key"] not in update_dict),
+        ({"Key": k, "Value": _invalid_tag_chars_re.sub("_", v)} for k, v in update_dict.items()),
     ))
 
 
@@ -256,22 +264,24 @@ def handle_s3_sns():
                     VersionId=s3_object_version,
                 )["TagSet"]
 
-            av_status_json = _tag_value_from_tag_set(tagging_tag_set, "avStatus")
+            av_status = _prefixed_tag_values_from_tag_set(tagging_tag_set, "avStatus.")
 
-            if av_status_json is None:
+            if av_status.get("avStatus.result") is None:
                 current_app.logger.info(
-                    "Object version {s3_object_version} has no 'avStatus' tag - will scan...",
+                    "Object version {s3_object_version} has no 'avStatus.result' tag - will scan...",
                     extra={
                         **base_log_context,
-                        "av_status": av_status_json,
+                        "av_status": av_status,
                     },
                 )
             else:
                 current_app.logger.info(
-                    "Object version {s3_object_version} already has 'avStatus' tag: {av_status}",
+                    "Object version {s3_object_version} already has 'avStatus.result' "
+                    "tag: {existing_av_status_result!r}",
                     extra={
                         **base_log_context,
-                        "av_status": av_status_json,
+                        "existing_av_status_result": av_status["avStatus.result"],
+                        "existing_av_status": av_status,
                     },
                 )
                 continue
@@ -344,13 +354,14 @@ def handle_s3_sns():
                 clamd_version = clamd_client.version()
                 log_context_clamd.update({"clamd_version": clamd_version})
 
-            # keep in mind we only have 256 chars to play with here, so keep it brief
+            # we namespace all keys set as part of an avStatus update with an "avStatus." prefix, intending that all
+            # of these keys are only ever set or removed together as they are all information about the same scanning
+            # decision
             new_av_status = {
-                "result": "pass" if clamd_result[0] == "OK" else "fail",
-                "clamdVerStr": clamd_version,
-                "ts": datetime.datetime.utcnow().isoformat(),
+                "avStatus.result": "pass" if clamd_result[0] == "OK" else "fail",
+                "avStatus.clamdVerStr": clamd_version,
+                "avStatus.ts": datetime.datetime.utcnow().isoformat(),
             }
-            new_av_status_json = json.dumps(new_av_status, separators=(',', ':'))
 
             # Now we briefly re-check the object's tags to ensure they weren't set by something else while we were
             # scanning. Note the impossibility of avoiding all possible race conditions as S3's API doesn't allow any
@@ -368,20 +379,25 @@ def handle_s3_sns():
                     VersionId=s3_object_version,
                 )["TagSet"]
 
-            av_status_json = _tag_value_from_tag_set(tagging_tag_set, "avStatus")
+            av_status = _prefixed_tag_values_from_tag_set(tagging_tag_set, "avStatus.")
 
-            if av_status_json is not None:
+            if av_status.get("avStatus.result") is not None:
                 current_app.logger.warning(
-                    "Object was tagged with new 'avStatus' ({existing_av_status}) while we were scanning. "
-                    "Not applying our own 'avStatus' result ({unapplied_av_status})",
+                    "Object was tagged with new 'avStatus.result' ({existing_av_status_result!r}) while we were "
+                    "scanning. Not applying our own 'avStatus' ({unapplied_av_status_result!r})",
                     extra={
-                        "existing_av_status": av_status_json,
-                        "unapplied_av_status": new_av_status_json,
+                        "existing_av_status_result": av_status["avStatus.result"],
+                        "unapplied_av_status_result": new_av_status["avStatus.result"],
+                        "existing_av_status": av_status,
+                        "unapplied_av_status": new_av_status,
                     },
                 )
                 continue
 
-            tagging_tag_set = _tag_set_updated_with_value(tagging_tag_set, "avStatus", new_av_status_json)
+            tagging_tag_set = _tag_set_updated_with_dict(
+                _tag_set_stripped_of_prefixed(tagging_tag_set, "avStatus."),
+                new_av_status,
+            )
 
             with log_external_request(
                 "S3",
