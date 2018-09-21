@@ -158,7 +158,7 @@ def _prefixed_tag_values_from_tag_set(tag_set, prefix):
     return {tag["Key"]: tag["Value"] for tag in tag_set if tag["Key"].startswith(prefix)}
 
 
-def _tag_set_stripped_of_prefixed(tag_set, prefix):
+def _tag_set_omitting_prefixed(tag_set, prefix):
     return [tag for tag in tag_set if not tag["Key"].startswith(prefix)]
 
 
@@ -408,7 +408,7 @@ def _handle_s3_sns_record(record, message_id):
             return
 
         tagging_tag_set = _tag_set_updated_with_dict(
-            _tag_set_stripped_of_prefixed(tagging_tag_set, "avStatus."),
+            _tag_set_omitting_prefixed(tagging_tag_set, "avStatus."),
             new_av_status,
         )
 
