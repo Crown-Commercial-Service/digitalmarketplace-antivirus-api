@@ -173,6 +173,13 @@ def _tag_set_updated_with_dict(tag_set, update_dict):
     ))
 
 
+_nonhex_re = re.compile("[^0-9a-f]")
+
+
+def _normalize_hex(value):
+    return _nonhex_re.sub("", value.lower())
+
+
 class UnknownClamdError(Exception):
     pass
 
@@ -428,9 +435,26 @@ def _handle_s3_sns_record(record, message_id):
             # TODO?         note the impossibility of doing this without some race conditions
 
             notify_client = DMNotifyClient(current_app.config["DM_NOTIFY_API_KEY"])
+
+            if (
+                len(clamd_result) >= 2 and
+                clamd_result[1].lower() == current_app.config["DM_EICAR_TEST_SIGNATURE_RESULT_STRING"].lower()
+            ):
+                notify_kwargs = {
+                    # we'll use the s3 ETag of the file as the notify ref - it will be the only piece of information
+                    # that will be shared knowledge between a functional test and the application yet also allow the
+                    # test to differentiate the results of its different test runs, allowing it to easily check for
+                    # the message being sent
+                    "reference": "eicar-found-{}".format(_normalize_hex(s3_object["ETag"])),
+                    "to_email_address": current_app.config["DM_EICAR_TEST_SIGNATURE_VIRUS_ALERT_EMAIL"],
+                }
+            else:
+                notify_kwargs = {
+                    "to_email_address": current_app.config["DM_DEVELOPER_VIRUS_ALERT_EMAIL"],
+                }
+
             try:
                 notify_client.send_email(
-                    current_app.config["DM_DEVELOPER_VIRUS_ALERT_EMAIL"],
                     template_name_or_id="developer_virus_alert",
                     personalisation={
                         "region_name": record.get("awsRegion") or "<unknown>",
@@ -440,8 +464,9 @@ def _handle_s3_sns_record(record, message_id):
                         "file_name": file_name or "<unknown>",
                         "clamd_output": ", ".join(clamd_result),
                         "sns_message_id": message_id,
-                        "dm_trace_id": request.trace_id or "<unknown>",
+                        "dm_trace_id": getattr(request, "trace_id", None) or "<unknown>",
                     },
+                    **notify_kwargs,
                 )
             except EmailError as e:
                 current_app.logger.error(

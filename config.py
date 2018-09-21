@@ -22,6 +22,8 @@ class Config:
 
     DM_NOTIFY_API_KEY = None
 
+    DM_EICAR_TEST_SIGNATURE_RESULT_STRING = "Eicar-Test-Signature"
+    DM_EICAR_TEST_SIGNATURE_VIRUS_ALERT_EMAIL = "eicar-found@example.gov.uk"
     DM_DEVELOPER_VIRUS_ALERT_EMAIL = "developer-virus-alert@example.com"
     NOTIFY_TEMPLATES = {
         "developer_virus_alert": "70986093-4f54-4b2e-883e-d88456455385",
