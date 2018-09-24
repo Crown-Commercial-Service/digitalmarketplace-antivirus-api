@@ -845,7 +845,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 (
                     mock.call("not_a_real_key-00000000-fake-uuid-0000-000000000000"),
                     mock.call().send_email(
-                        "developer-virus-alert@example.com",
+                        to_email_address="developer-virus-alert@example.com",
                         personalisation={
                             "bucket_name": "spade",
                             "clamd_output": "FOUND, After him, Garry!",
@@ -865,6 +865,116 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     "avStatus.clamdVerStr": "ClamAV 567_ first watch",
                     "avStatus.ts": "2010-09-08T07:06:05.040302",
                     "surprise": "tag234",
+                }
+            ),
+            (
+                # initial_tagset
+                {"existing": "tag123"},
+                # concurrent_new_tagset
+                None,
+                # clamd_instream_retval
+                {"stream": ("FOUND", "eicar-test-signature",)},
+                # expected_exception
+                None,
+                # expected_log_calls
+                (
+                    (
+                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "message_id": "424344def",
+                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
+                        })}),
+                    ),
+                    (
+                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "s3_bucket_name": "spade",
+                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_version": "0",
+                        })}),
+                    ),
+                    (
+                        (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus\.result. tag "), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "av_status": {},
+                            "s3_bucket_name": "spade",
+                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_version": "0",
+                        })}),
+                    ),
+                    (
+                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "s3_bucket_name": "spade",
+                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_version": "0",
+                        })}),
+                    ),
+                    (
+                        (logging.INFO, AnyStringMatching(r"Scanned "), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "file_length": 12,
+                            "file_name": "too ducky.puddeny-pie.pdf",
+                            "clamd_result": ("FOUND", "eicar-test-signature"),
+                        })}),
+                    ),
+                    (
+                        (logging.DEBUG, AnyStringMatching(r"Fetched clamd version "), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "clamd_version": "ClamAV 567; first watch",
+                        })}),
+                    ),
+                    (
+                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "s3_bucket_name": "spade",
+                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_version": "0",
+                        })}),
+                    ),
+                    (
+                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(put object tagging"), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "s3_bucket_name": "spade",
+                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_version": "0",
+                        })}),
+                    ),
+                    (
+                        (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
+                        AnySupersetOf({"extra": AnySupersetOf({
+                            "s3_bucket_name": "spade",
+                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_version": "0",
+                        })}),
+                    ),
+                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
+                ),
+                # expected_notify_calls
+                (
+                    mock.call("not_a_real_key-00000000-fake-uuid-0000-000000000000"),
+                    mock.call().send_email(
+                        to_email_address="eicar-found@example.gov.uk",
+                        personalisation={
+                            "bucket_name": "spade",
+                            "clamd_output": "FOUND, eicar-test-signature",
+                            "dm_trace_id": mock.ANY,
+                            "file_name": "too ducky.puddeny-pie.pdf",
+                            "object_key": "sandman/4321-billy-winks.pdf",
+                            "object_version": "0",
+                            "region_name": "howth-west-2",
+                            "sns_message_id": "424344def",
+                        },
+                        template_name_or_id="developer_virus_alert",
+                        reference="eicar-found-4d3daeeb3ea3d90d4d6e7a20a5b483a9-development",
+                    ),
+                ),
+                # expected_tagset
+                {
+                    "avStatus.result": "fail",
+                    "avStatus.clamdVerStr": "ClamAV 567_ first watch",
+                    "avStatus.ts": "2010-09-08T07:06:05.040302",
+                    "existing": "tag123",
                 }
             ),
             (
