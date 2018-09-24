@@ -966,7 +966,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                             "sns_message_id": "424344def",
                         },
                         template_name_or_id="developer_virus_alert",
-                        reference="eicar-found-4d3daeeb3ea3d90d4d6e7a20a5b483a9",
+                        reference="eicar-found-4d3daeeb3ea3d90d4d6e7a20a5b483a9-development",
                     ),
                 ),
                 # expected_tagset

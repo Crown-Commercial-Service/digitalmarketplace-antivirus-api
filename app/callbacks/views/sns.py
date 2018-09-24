@@ -445,7 +445,10 @@ def _handle_s3_sns_record(record, message_id):
                     # that will be shared knowledge between a functional test and the application yet also allow the
                     # test to differentiate the results of its different test runs, allowing it to easily check for
                     # the message being sent
-                    "reference": "eicar-found-{}".format(_normalize_hex(s3_object["ETag"])),
+                    "reference": "eicar-found-{}-{}".format(
+                        _normalize_hex(s3_object["ETag"]),
+                        current_app.config["DM_ENVIRONMENT"],
+                    ),
                     "to_email_address": current_app.config["DM_EICAR_TEST_SIGNATURE_VIRUS_ALERT_EMAIL"],
                 }
             else:
