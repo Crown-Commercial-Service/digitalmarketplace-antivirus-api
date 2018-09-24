@@ -13,3 +13,7 @@ def _get_clamd_socket_inner():
 
 def get_clamd_socket():
     return _get_clamd_socket_inner()
+
+
+class UnknownClamdError(Exception):
+    pass

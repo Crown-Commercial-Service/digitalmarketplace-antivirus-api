@@ -19,11 +19,10 @@ from dmutils.timing import logged_duration
 
 from dmtestutils.comparisons import AnySupersetOf, AnyStringMatching, RestrictedAny
 
+from app.clam import UnknownClamdError
 from app.callbacks.views.sns import (
-    _filename_from_content_disposition,
     _get_certificate,
     _handle_subscription_confirmation,
-    UnknownClamdError,
 )
 
 from ..helpers import BaseCallbackApplicationTest
@@ -55,7 +54,9 @@ def force_all_logged_duration():
         mock_sns_logged_duration.side_effect = logged_duration_wrapper
         with mock.patch("dmutils.timing.logged_duration", autospec=True) as mock_timing_logged_duration:
             mock_timing_logged_duration.side_effect = logged_duration_wrapper
-            yield
+            with mock.patch("app.s3.logged_duration", autospec=True) as mock_s3_logged_duration:
+                mock_s3_logged_duration.side_effect = logged_duration_wrapper
+                yield
 
 
 @pytest.fixture
@@ -112,16 +113,6 @@ def _dict_from_tagset(tagset_seq):
 
 def _tagset_from_dict(input_dict):
     return [{"Key": k, "Value": v} for k, v in input_dict.items()]
-
-
-@pytest.mark.parametrize("cd_string,expected_output", (
-    ("a", None,),
-    ("attachment; filename=abcd3_ .pdf ", "abcd3_ .pdf",),
-    ('bla; bla; filename="things...other...things.PNG";', "things...other...things.PNG",),
-    (';filename= 8765432', " 8765432",),
-))
-def test_filename_from_content_disposition(cd_string, expected_output):
-    assert _filename_from_content_disposition(cd_string) == expected_output
 
 
 class TestGetCertificate(BaseCallbackApplicationTest):
@@ -1393,7 +1384,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
     @freeze_time("2010-09-08T07:06:05.040302")
     @mock.patch("validatesns.validate", autospec=True)
     @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)
-    @mock.patch("app.callbacks.views.sns.DMNotifyClient", autospec=True)
+    @mock.patch("app.s3.DMNotifyClient", autospec=True)
     def test_handle_s3_sns_notification(
         self,
         mock_notify_client,
