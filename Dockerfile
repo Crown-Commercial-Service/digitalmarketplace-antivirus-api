@@ -36,3 +36,9 @@ RUN cat /home/vcap/additional-supervisord.conf >> /etc/supervisord.conf
 
 COPY config/additional-awslogs.conf /home/vcap/additional-awslogs.conf
 RUN cat /home/vcap/additional-awslogs.conf >> /etc/awslogs.conf
+
+COPY scripts/inject-sns-ips-into-nginx-api-conf.py /usr/local/sbin/inject-sns-ips-into-nginx-api-conf.py
+COPY templates/api.j2 /etc/nginx/templates/api.j2
+COPY config/logrotate.conf /etc/logrotate.d/amazon_ip_update
+RUN echo "@reboot . /app/venv/bin/activate && /usr/local/sbin/inject-sns-ips-into-nginx-api-conf.py" | crontab -
+RUN (crontab -l && echo "*/5 * * * * . /app/venv/bin/activate && /usr/local/sbin/inject-sns-ips-into-nginx-api-conf.py") | crontab -

@@ -1,0 +1,18 @@
+server {
+    listen 80;
+
+    location /callbacks {
+      {% for sns_ip in sns_ips %}
+        allow {{ sns_ip }};
+      {% endfor %}
+        deny all;
+
+        include uwsgi_params;
+        uwsgi_pass unix:///run/uwsgi.sock;
+    }
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:///run/uwsgi.sock;
+    }
+}

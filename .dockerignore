@@ -6,3 +6,5 @@
 !config.py
 !requirements.txt
 !config/
+!scripts/
+!templates/
