@@ -4,6 +4,7 @@ import json
 import logging
 import sys
 
+import boto3
 from flask import abort, jsonify, current_app, request
 from lxml.etree import fromstring as etree_fromstring, ParseError
 import requests
@@ -13,7 +14,8 @@ import validatesns
 from dmutils.timing import logged_duration
 
 from app.callbacks import callbacks
-from app.s3 import scan_s3_object
+from app.decorators import json_payload_view
+from app.s3 import scan_and_tag_s3_object
 
 
 @callbacks.route('/')
@@ -140,9 +142,8 @@ VALIDATION_MAX_AGE = datetime.timedelta(hours=1, minutes=1)
 
 
 @callbacks.route("/sns/s3/uploaded", methods=['POST'])
-def handle_s3_sns():
-    body_dict = _get_request_body_json()
-
+@json_payload_view(acceptable_content_types=("application/json", "text/plain",))
+def handle_s3_sns(body_dict):
     # check SNS signature authenticity
     try:
         validatesns.validate(
@@ -187,8 +188,8 @@ def handle_s3_sns():
         abort(400, f"Message contents didn't match expected format")
 
     for record in records:
-        scan_s3_object(
-            aws_region=record["awsRegion"],
+        scan_and_tag_s3_object(
+            s3_client=boto3.client("s3", region_name=record["awsRegion"]),
             s3_bucket_name=record["s3"]["bucket"]["name"],
             s3_object_key=record["s3"]["object"]["key"],
             s3_object_version=record["s3"]["object"]["versionId"],
