@@ -195,4 +195,4 @@ def handle_s3_sns():
             sns_message_id=body_dict["MessageId"],
         )
 
-    return jsonify(status="ok", dmTraceId=request.trace_id), 200
+    return jsonify(status="ok"), 200

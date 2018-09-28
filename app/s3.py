@@ -4,7 +4,6 @@ import logging
 import re
 import sys
 
-import boto3
 from flask import current_app, request
 
 from dmutils.email.dm_notify import DMNotifyClient
@@ -50,8 +49,8 @@ def _normalize_hex(value):
     return _nonhex_re.sub("", value.lower())
 
 
-def scan_s3_object(
-    aws_region,
+def scan_and_tag_s3_object(
+    s3_client,
     s3_bucket_name,
     s3_object_key,
     s3_object_version,
@@ -78,8 +77,6 @@ def scan_s3_object(
         log_context.update(base_log_context)
 
         # TODO abort if file too big?
-
-        s3_client = boto3.client("s3", region_name=aws_region)
 
         with log_external_request(
             "S3",
@@ -113,7 +110,7 @@ def scan_s3_object(
                     "existing_av_status": av_status,
                 },
             )
-            return
+            return av_status, False, None
 
         clamd_client = get_clamd_socket()
         # first check our clamd is available - there's no point in going and fetching the object if we can't do
@@ -221,7 +218,7 @@ def scan_s3_object(
                     "unapplied_av_status": new_av_status,
                 },
             )
-            return
+            return av_status, False, new_av_status
 
         tagging_tag_set = _tag_set_updated_with_dict(
             _tag_set_omitting_prefixed(tagging_tag_set, "avStatus."),
@@ -276,13 +273,12 @@ def scan_s3_object(
                 notify_client.send_email(
                     template_name_or_id="developer_virus_alert",
                     personalisation={
-                        "region_name": aws_region,
                         "bucket_name": s3_bucket_name,
                         "object_key": s3_object_key,
                         "object_version": s3_object_version,
                         "file_name": file_name or "<unknown>",
                         "clamd_output": ", ".join(clamd_result),
-                        "sns_message_id": sns_message_id,
+                        "sns_message_id": sns_message_id or "<N/A>",
                         "dm_trace_id": getattr(request, "trace_id", None) or "<unknown>",
                     },
                     **notify_kwargs,
@@ -299,3 +295,5 @@ def scan_s3_object(
                 # however we probably don't want this to cause a 500 because the main task has been completed - retrying
                 # it won't work and e.g. we eill want to signify to SNS that it should not attempt to re-send this
                 # message
+
+        return av_status, True, new_av_status
