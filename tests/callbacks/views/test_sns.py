@@ -1,34 +1,29 @@
-import contextlib
 from itertools import chain
 import json
 import logging
 
-import boto3
 from freezegun import freeze_time
 from flask.wrappers import Response
 from lxml.etree import ParseError
 import mock
-from moto.s3 import mock_s3
 import pytest
 import requests
 import requests_mock
 import validatesns
 import werkzeug
 
-from dmutils.timing import logged_duration
-
 from dmtestutils.comparisons import AnySupersetOf, AnyStringMatching, RestrictedAny
 
-from app.clam import UnknownClamdError
 from app.callbacks.views.sns import (
     _get_certificate,
     _handle_subscription_confirmation,
 )
 
 from ..helpers import BaseCallbackApplicationTest
+from ...helpers import null_context_manager
 
 
-_aws_region = "howth-west-2"
+pytestmark = pytest.mark.usefixtures("force_all_logged_duration")
 
 
 @pytest.fixture(autouse=True)
@@ -38,81 +33,6 @@ def clear_get_certificate_cache():
     _get_certificate.cache_clear()
     yield
     _get_certificate.cache_clear()
-
-
-@pytest.fixture(autouse=True)
-def force_all_logged_duration():
-    # this looks more complicated than it is - it simply forces the kwarg condition=True on all calls to logged_duration
-    def logged_duration_wrapper(*args, **kwargs):
-        return logged_duration(
-            *args,
-            **{**kwargs, "condition": True},
-        )
-
-    # apply this mock in multiple places
-    with mock.patch("app.callbacks.views.sns.logged_duration", autospec=True) as mock_sns_logged_duration:
-        mock_sns_logged_duration.side_effect = logged_duration_wrapper
-        with mock.patch("dmutils.timing.logged_duration", autospec=True) as mock_timing_logged_duration:
-            mock_timing_logged_duration.side_effect = logged_duration_wrapper
-            with mock.patch("app.s3.logged_duration", autospec=True) as mock_s3_logged_duration:
-                mock_s3_logged_duration.side_effect = logged_duration_wrapper
-                yield
-
-
-@pytest.fixture
-def s3_mock(request, os_environ):
-    # we don't want any real aws credentials this environment might have used in the tests
-    os_environ.update({
-        "AWS_ACCESS_KEY_ID": "AKIAIABCDABCDABCDABC",
-        "AWS_SECRET_ACCESS_KEY": "foobarfoobarfoobarfoobarfoobarfoobarfoob",
-    })
-
-    m = mock_s3()
-    m.start()
-    yield m
-    m.stop()
-
-
-@pytest.fixture
-def empty_bucket(request, s3_mock):
-    s3_res = boto3.resource("s3", region_name=_aws_region)
-    bucket = s3_res.Bucket("spade")
-    bucket.create()
-    bucket.Versioning().enable()
-    yield bucket
-
-
-@pytest.fixture
-def bucket_with_file(request, empty_bucket):
-    bucket = empty_bucket
-    obj = empty_bucket.Object("sandman/4321-billy-winks.pdf")
-    obj.put(
-        Body=b"123412341234",
-        Metadata={
-            "timestamp": "2005-04-03T02:01:00.12345Z",
-        },
-        ContentType="application/pdf",
-        ContentDisposition='attachment; filename="too ducky.puddeny-pie.pdf"',
-    )
-    yield bucket, obj.Version(obj.version_id)
-
-
-@contextlib.contextmanager
-def null_context_manager():
-    yield
-
-
-class AnyJsonEq(RestrictedAny):
-    def __init__(self, other):
-        super().__init__(lambda x: json.loads(x) == other)
-
-
-def _dict_from_tagset(tagset_seq):
-    return {k_v["Key"]: k_v["Value"] for k_v in tagset_seq}
-
-
-def _tagset_from_dict(input_dict):
-    return [{"Key": k, "Value": v} for k, v in input_dict.items()]
 
 
 class TestGetCertificate(BaseCallbackApplicationTest):
@@ -254,13 +174,13 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
             (
                 (
                     # body_dict
-                    {"SubscribeURL": "https://amz.net", "TopicArn": f"arn:aws:sns:{_aws_region}:123456789012:Drawers"},
+                    {"SubscribeURL": "https://amz.net", "TopicArn": f"arn:aws:sns:howth-west-2:123456789012:Drawers"},
                     # supported_topic_name
                     "Drawers",
                     # rmock_response_kwargs
                     {"text": f"""<ConfirmSubscriptionResponse xmlns="http://brazenfaced.things">
                         <ConfirmSubscriptionResult><SubscriptionArn>
-                            arn:aws:sns:{_aws_region}:123456789012:Drawers:bicycles
+                            arn:aws:sns:howth-west-2:123456789012:Drawers:bicycles
                         </SubscriptionArn></ConfirmSubscriptionResult>
                         <ResponseMetadata><RequestId>
                             always-skeezing
@@ -277,7 +197,7 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
                             AnySupersetOf({
                                 "extra": AnySupersetOf({
                                     "target_url": "https://amz.net",
-                                    "topic_arn": f"arn:aws:sns:{_aws_region}:123456789012:Drawers",
+                                    "topic_arn": f"arn:aws:sns:howth-west-2:123456789012:Drawers",
                                 }),
                             }),
                         ),
@@ -285,7 +205,7 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
                             (logging.INFO, AnyStringMatching("SubscriptionConfirmation succeeded "), ()),
                             AnySupersetOf({
                                 "extra": AnySupersetOf({
-                                    "subscription_arn": f"arn:aws:sns:{_aws_region}:123456789012:Drawers:bicycles",
+                                    "subscription_arn": f"arn:aws:sns:howth-west-2:123456789012:Drawers:bicycles",
                                     "confirmation_request_id": "always-skeezing",
                                 }),
                             }),
@@ -642,807 +562,18 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                     ((self._basic_subscription_confirmation_body, "s3_file_upload_notification_development",), {})
                 ]
 
-    @pytest.mark.parametrize(
-        (
-            "initial_tagset",
-            "concurrent_new_tagset",
-            "clamd_instream_retval",
-            "expected_exception",
-            "expected_log_calls",
-            "expected_notify_calls",
-            "expected_tagset",
-        ),
-        (
-            (
-                # initial_tagset
-                {
-                    "existing": "tag123",
-                    "avStatus.irrelevant": "who is here",
-                },
-                # concurrent_new_tagset
-                {"surprise": "tag234"},
-                # clamd_instream_retval
-                {"stream": ("OK", "dénouement sufficient",)},
-                # expected_exception
-                None,
-                # expected_log_calls
-                (
-                    (
-                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "message_id": "424344def",
-                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus\.result. tag "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": {"avStatus.irrelevant": "who is here"},
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Scanned "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "file_length": 12,
-                            "file_name": "too ducky.puddeny-pie.pdf",
-                            "clamd_result": ("OK", "dénouement sufficient"),
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Fetched clamd version "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "clamd_version": "ClamAV 567; first watch",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(put object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
-                ),
-                # expected_notify_calls
-                (),
-                # expected_tagset
-                {
-                    "avStatus.result": "pass",
-                    "avStatus.clamdVerStr": "ClamAV 567_ first watch",
-                    "avStatus.ts": "2010-09-08T07:06:05.040302",
-                    "surprise": "tag234",
-                },
-            ),
-            (
-                # initial_tagset
-                {"existing": "tag123"},
-                # concurrent_new_tagset
-                {"surprise": "tag234"},
-                # clamd_instream_retval
-                {"stream": ("FOUND", "After him, Garry!",)},
-                # expected_exception
-                None,
-                # expected_log_calls
-                (
-                    (
-                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "message_id": "424344def",
-                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus\.result. tag "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": {},
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Scanned "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "file_length": 12,
-                            "file_name": "too ducky.puddeny-pie.pdf",
-                            "clamd_result": ("FOUND", "After him, Garry!"),
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Fetched clamd version "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "clamd_version": "ClamAV 567; first watch",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(put object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
-                ),
-                # expected_notify_calls
-                (
-                    mock.call("not_a_real_key-00000000-fake-uuid-0000-000000000000"),
-                    mock.call().send_email(
-                        to_email_address="developer-virus-alert@example.com",
-                        personalisation={
-                            "bucket_name": "spade",
-                            "clamd_output": "FOUND, After him, Garry!",
-                            "dm_trace_id": mock.ANY,
-                            "file_name": "too ducky.puddeny-pie.pdf",
-                            "object_key": "sandman/4321-billy-winks.pdf",
-                            "object_version": "0",
-                            "region_name": "howth-west-2",
-                            "sns_message_id": "424344def",
-                        },
-                        template_name_or_id="developer_virus_alert",
-                    ),
-                ),
-                # expected_tagset
-                {
-                    "avStatus.result": "fail",
-                    "avStatus.clamdVerStr": "ClamAV 567_ first watch",
-                    "avStatus.ts": "2010-09-08T07:06:05.040302",
-                    "surprise": "tag234",
-                }
-            ),
-            (
-                # initial_tagset
-                {"existing": "tag123"},
-                # concurrent_new_tagset
-                None,
-                # clamd_instream_retval
-                {"stream": ("FOUND", "eicar-test-signature",)},
-                # expected_exception
-                None,
-                # expected_log_calls
-                (
-                    (
-                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "message_id": "424344def",
-                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus\.result. tag "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": {},
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Scanned "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "file_length": 12,
-                            "file_name": "too ducky.puddeny-pie.pdf",
-                            "clamd_result": ("FOUND", "eicar-test-signature"),
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Fetched clamd version "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "clamd_version": "ClamAV 567; first watch",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(put object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
-                ),
-                # expected_notify_calls
-                (
-                    mock.call("not_a_real_key-00000000-fake-uuid-0000-000000000000"),
-                    mock.call().send_email(
-                        to_email_address="eicar-found@example.gov.uk",
-                        personalisation={
-                            "bucket_name": "spade",
-                            "clamd_output": "FOUND, eicar-test-signature",
-                            "dm_trace_id": mock.ANY,
-                            "file_name": "too ducky.puddeny-pie.pdf",
-                            "object_key": "sandman/4321-billy-winks.pdf",
-                            "object_version": "0",
-                            "region_name": "howth-west-2",
-                            "sns_message_id": "424344def",
-                        },
-                        template_name_or_id="developer_virus_alert",
-                        reference="eicar-found-4d3daeeb3ea3d90d4d6e7a20a5b483a9-development",
-                    ),
-                ),
-                # expected_tagset
-                {
-                    "avStatus.result": "fail",
-                    "avStatus.clamdVerStr": "ClamAV 567_ first watch",
-                    "avStatus.ts": "2010-09-08T07:06:05.040302",
-                    "existing": "tag123",
-                }
-            ),
-            (
-                # initial_tagset
-                {"existing": "tag123"},
-                # concurrent_new_tagset
-                {
-                    "surprise": "tag234",
-                    "avStatus.ts": "2010-09-08T07:06:05.040302",
-                },
-                # clamd_instream_retval
-                {"stream": ("ERROR", " Some trouble is on here",)},
-                # expected_exception
-                UnknownClamdError,
-                # expected_log_calls
-                (
-                    (
-                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "message_id": "424344def",
-                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus\.result. tag "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": {},
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Scanned "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "file_length": 12,
-                            "file_name": "too ducky.puddeny-pie.pdf",
-                            "clamd_result": ("ERROR", " Some trouble is on here",),
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Failed handling.*UnknownClamdError.*"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                ),
-                # expected_notify_calls
-                (),
-                # expected_tagset
-                {
-                    "surprise": "tag234",
-                    "avStatus.ts": "2010-09-08T07:06:05.040302",
-                },
-            ),
-            (
-                # initial_tagset
-                {"existing": "tag123"},
-                # concurrent_new_tagset
-                {
-                    "avStatus.result": "fail",
-                    "avStatus.ts": "2010-09-08T07:06:04.010101",
-                    "avStatus.irrelevant": "who is here",
-                },
-                # clamd_instream_retval
-                {"stream": ("OK", "Egg two demolished",)},
-                # expected_exception
-                None,
-                # expected_log_calls
-                (
-                    (
-                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "message_id": "424344def",
-                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus\.result. tag "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": {},
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Scanned "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "file_length": 12,
-                            "file_name": "too ducky.puddeny-pie.pdf",
-                            "clamd_result": ("OK", "Egg two demolished"),
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Fetched clamd version "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "clamd_version": "ClamAV 567; first watch",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (
-                            logging.WARNING,
-                            AnyStringMatching(r"Object was tagged.*existing.*unapplied.*"),
-                            (),
-                        ),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "existing_av_status": {
-                                "avStatus.result": "fail",
-                                "avStatus.ts": "2010-09-08T07:06:04.010101",
-                                "avStatus.irrelevant": "who is here",
-                            },
-                            "existing_av_status_result": "fail",
-                            "unapplied_av_status": {
-                                "avStatus.result": "pass",
-                                "avStatus.clamdVerStr": "ClamAV 567; first watch",
-                                "avStatus.ts": "2010-09-08T07:06:05.040302",
-                            },
-                            "unapplied_av_status_result": "pass",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
-                ),
-                # expected_notify_calls
-                (),
-                # expected_tagset
-                {
-                    "avStatus.result": "fail",
-                    "avStatus.ts": "2010-09-08T07:06:04.010101",
-                    "avStatus.irrelevant": "who is here",
-                },
-            ),
-            (
-                # initial_tagset
-                {"existing": "tag123"},
-                # concurrent_new_tagset
-                {
-                    "avStatus.result": "pass",
-                    "avStatus.ts": "2010-09-08T07:06:04.010101",
-                    "avStatus.clamdVerStr": "4321_ 7654",
-                    "surprise": "789+789",
-                },
-                # clamd_instream_retval
-                {"stream": ("FOUND", "After him, boy!",)},
-                # expected_exception
-                None,
-                # expected_log_calls
-                (
-                    (
-                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "message_id": "424344def",
-                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Object version .* has no .avStatus\.result. tag "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "av_status": {},
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Scanned "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "file_length": 12,
-                            "file_name": "too ducky.puddeny-pie.pdf",
-                            "clamd_result": ("FOUND", "After him, boy!"),
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Fetched clamd version "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "clamd_version": "ClamAV 567; first watch",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (
-                            logging.WARNING,
-                            AnyStringMatching(r"Object was tagged.*existing.*unapplied.*"),
-                            (),
-                        ),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "existing_av_status": {
-                                "avStatus.result": "pass",
-                                "avStatus.ts": "2010-09-08T07:06:04.010101",
-                                "avStatus.clamdVerStr": "4321_ 7654",
-                            },
-                            "existing_av_status_result": "pass",
-                            "unapplied_av_status": {
-                                "avStatus.result": "fail",
-                                "avStatus.clamdVerStr": "ClamAV 567; first watch",
-                                "avStatus.ts": "2010-09-08T07:06:05.040302",
-                            },
-                            "unapplied_av_status_result": "fail",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
-                ),
-                # expected_notify_calls
-                (),
-                # expected_tagset
-                {
-                    "avStatus.result": "pass",
-                    "avStatus.ts": "2010-09-08T07:06:04.010101",
-                    "avStatus.clamdVerStr": "4321_ 7654",
-                    "surprise": "789+789",
-                },
-            ),
-            (
-                # initial_tagset
-                {
-                    "avStatus.result": "pass",
-                    "avStatus.ts": "2010-09-08T07:06:04.010101",
-                },
-                # concurrent_new_tagset
-                None,
-                # clamd_instream_retval
-                None,
-                # expected_exception
-                None,
-                # expected_log_calls
-                (
-                    (
-                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "message_id": "424344def",
-                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Object version.*already.*avStatus\.result.*tag.+"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "existing_av_status": {
-                                "avStatus.result": "pass",
-                                "avStatus.ts": "2010-09-08T07:06:04.010101",
-                            },
-                            "existing_av_status_result": "pass",
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
-                ),
-                # expected_notify_calls
-                (),
-                # expected_tagset
-                {
-                    "avStatus.result": "pass",
-                    "avStatus.ts": "2010-09-08T07:06:04.010101",
-                },
-            ),
-            (
-                # initial_tagset
-                {
-                    "avStatus.result": "fail",
-                    "avStatus.ts": "2010-09-08T07:06:04.010101",
-                },
-                # concurrent_new_tagset
-                None,
-                # clamd_instream_retval
-                None,
-                # expected_exception
-                None,
-                # expected_log_calls
-                (
-                    (
-                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "message_id": "424344def",
-                            "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
-                        })}),
-                    ),
-                    (
-                        (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Object version.*already.*avStatus\.result.*tag.+"), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "existing_av_status": {
-                                "avStatus.result": "fail",
-                                "avStatus.ts": "2010-09-08T07:06:04.010101",
-                            },
-                            "existing_av_status_result": "fail",
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (
-                        (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
-                        AnySupersetOf({"extra": AnySupersetOf({
-                            "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
-                            "s3_object_version": "0",
-                        })}),
-                    ),
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
-                ),
-                # expected_notify_calls
-                (),
-                # expected_tagset
-                {
-                    "avStatus.result": "fail",
-                    "avStatus.ts": "2010-09-08T07:06:04.010101",
-                },
-            ),
-        ),
-    )
-    @freeze_time("2010-09-08T07:06:05.040302")
+    @pytest.mark.parametrize("content_type", ("application/json", "text/plain",))
+    @mock.patch("app.callbacks.views.sns.scan_and_tag_s3_object", autospec=True)
     @mock.patch("validatesns.validate", autospec=True)
-    @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)
-    @mock.patch("app.s3.DMNotifyClient", autospec=True)
     def test_handle_s3_sns_notification(
         self,
-        mock_notify_client,
-        mock_handle_subscription_confirmation,
         mock_validate,
+        mock_scan_and_tag_s3_object,
+        content_type,
         bucket_with_file,
-        mock_clamd,
-        initial_tagset,
-        concurrent_new_tagset,
-        clamd_instream_retval,
-        expected_exception,
-        expected_log_calls,
-        expected_notify_calls,
-        expected_tagset,
     ):
-        """
-        :param initial_tagset:        tagset (dict) that file in bucket will appear to have initially
-        :param concurrent_new_tagset: a tagset (dict) that coincidentally gets set "while" the clam instream process
-                                      is running, None to skip this update
-        :param clamd_instream_retval: value to return from mock clamd instream(...) call, None to expect no call to
-                                      take place
-        :param expected_exception:    Exception subclass to expect to be raised by request, None to expect a successful
-                                      (status 200) response
-        :param expected_log_calls:    sequence of expected mock.call()s to have been made to app logger
-        :param expected_notify_calls: sequence of expected mock.call()s to have been made to mock DMNotifyClient
-        :param expected_tagset:       tagset (dict) to expect file to have after the request processing has finished
-        """
         bucket, objver = bucket_with_file
-        s3_client = boto3.client("s3", region_name=_aws_region)
 
-        if initial_tagset is not None:
-            s3_client.put_object_tagging(
-                Bucket=bucket.name,
-                Key=objver.Object().key,
-                VersionId=objver.id,
-                Tagging={"TagSet": _tagset_from_dict(initial_tagset)},
-            )
-
-        def clamd_instream_func(*args, **kwargs):
-            # if clamd_instream_retval *is* None, we'd be expecting "instream" not to be called at all
-            assert clamd_instream_retval is not None
-
-            assert args == (RestrictedAny(lambda x: x.read() == b"123412341234"),)
-            assert kwargs == {}
-
-            if concurrent_new_tagset is not None:
-                # a very literal "side effect" here - simulating a modification to the object's tags while scanning...
-                s3_client.put_object_tagging(
-                    Bucket=bucket.name,
-                    Key=objver.Object().key,
-                    VersionId=objver.id,
-                    Tagging={"TagSet": _tagset_from_dict(concurrent_new_tagset)},
-                )
-
-            return clamd_instream_retval
-
-        mock_clamd.instream.side_effect = clamd_instream_func
-        mock_clamd.version.return_value = "ClamAV 567; first watch"
         with self.mocked_app_logger_log() as mock_app_log:
             client = self.get_authorized_client()
             body_dict = {
@@ -1461,31 +592,40 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                                     "versionId": objver.id,
                                 },
                             },
-                            "awsRegion": _aws_region,
+                            "awsRegion": "howth-west-2",
                         },
                     ],
                 }),
             }
             subscription_arn = f"{body_dict['TopicArn']}:314159"
 
-            with pytest.raises(expected_exception) if expected_exception else null_context_manager():
-                res = client.post(
-                    "/callbacks/sns/s3/uploaded",
-                    data=json.dumps(body_dict),
-                    content_type="application/json",
-                    headers={"X-Amz-Sns-Subscription-Arn": subscription_arn},
-                )
+            res = client.post(
+                "/callbacks/sns/s3/uploaded",
+                data=json.dumps(body_dict),
+                content_type=content_type,
+                headers={"X-Amz-Sns-Subscription-Arn": subscription_arn},
+            )
 
-            if not expected_exception:
-                assert res.status_code == 200
-
-            assert mock_app_log.call_args_list == list(expected_log_calls)
-            assert mock_notify_client.mock_calls == list(expected_notify_calls)
-
-            assert _dict_from_tagset(
-                s3_client.get_object_tagging(
-                    Bucket=bucket.name,
-                    Key=objver.Object().key,
-                    VersionId=objver.id,
-                )["TagSet"]
-            ) == expected_tagset
+            assert res.status_code == 200
+            assert mock_app_log.call_args_list == [
+                (
+                    (logging.INFO, AnyStringMatching(r"Processing message "), ()),
+                    AnySupersetOf({"extra": AnySupersetOf({
+                        "message_id": "424344def",
+                        "subscription_arn": "bull:by:the:horns:123:s3_file_upload_notification_development:314159",
+                    })}),
+                ),
+                (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})})),
+            ]
+            assert mock_validate.call_args_list == [
+                ((body_dict,), AnySupersetOf({}))
+            ]
+            assert mock_scan_and_tag_s3_object.call_args_list == [
+                mock.call(
+                    s3_client=mock.ANY,
+                    s3_bucket_name=bucket.name,
+                    s3_object_key=objver.Object().key,
+                    s3_object_version=objver.id,
+                    sns_message_id="424344def",
+                ),
+            ]

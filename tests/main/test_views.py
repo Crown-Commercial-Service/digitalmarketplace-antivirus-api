@@ -113,7 +113,7 @@ class TestScanS3Object(BaseApplicationTest):
     def test_correct_passthrough(self, mock_scan_and_tag_s3_object, bucket_with_file):
         bucket, objver = bucket_with_file
         client = self.get_authorized_client()
-        mock_scan_and_tag_s3_object.return_value = {}, True, {}
+        mock_scan_and_tag_s3_object.return_value = {"delectable": "swig"}, True, {"gurgling": "noise"}
         res = client.post(
             "/scan/s3-object",
             data=json.dumps({
@@ -127,9 +127,9 @@ class TestScanS3Object(BaseApplicationTest):
         assert res.status_code == 200
         assert res.content_type == "application/json"
         assert json.loads(res.get_data()) == {
-            "existingAvStatus": {},
+            "existingAvStatus": {"delectable": "swig"},
             "avStatusApplied": True,
-            "newAvStatus": {},
+            "newAvStatus": {"gurgling": "noise"},
         }
 
         assert mock_scan_and_tag_s3_object.call_args_list == [

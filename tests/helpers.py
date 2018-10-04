@@ -21,3 +21,16 @@ class BaseApplicationTest:
         with mock.patch.object(self.app.logger, "isEnabledFor", return_value=True):
             with mock.patch.object(self.app.logger, "_log") as _log:
                 yield _log
+
+
+@contextlib.contextmanager
+def null_context_manager():
+    yield
+
+
+def dict_from_tagset(tagset_seq):
+    return {k_v["Key"]: k_v["Value"] for k_v in tagset_seq}
+
+
+def tagset_from_dict(input_dict):
+    return [{"Key": k, "Value": v} for k, v in input_dict.items()]

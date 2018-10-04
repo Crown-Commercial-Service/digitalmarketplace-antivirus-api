@@ -83,7 +83,10 @@ def scan_s3_object(body_dict):
     )
 
     return jsonify(
+        # any avStatus.* tags the object already had or were added while we were busy scanning
         existingAvStatus=old_av_status,
+        # the newly-calculated avStatus, if scanning was performed
         newAvStatus=new_av_status,
+        # whether the new avStatus was actually applied to the s3 object tags
         avStatusApplied=applied,
     ), 200
