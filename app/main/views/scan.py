@@ -37,7 +37,7 @@ def scan_direct():
     return jsonify(response_json), 200
 
 
-@main.route('/scan/s3-object', methods=['POST'])
+@main.route('/scan/s3-object', methods=["PUT", "POST"])
 @json_payload_view()
 @require_json_keys(("bucketName", "objectKey", "objectVersionId",))
 def scan_s3_object(body_dict):
