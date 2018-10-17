@@ -1,15 +1,19 @@
 import json
 import mock
 
+import pytest
+
 from ..helpers import BaseApplicationTest
 
 
+@pytest.mark.parametrize("method", ("PUT", "POST",))
 class TestScanS3Object(BaseApplicationTest):
     @mock.patch("app.main.views.scan.scan_and_tag_s3_object", autospec=True)
-    def test_missing_json_keys(self, mock_scan_and_tag_s3_object):
+    def test_missing_json_keys(self, mock_scan_and_tag_s3_object, method):
         client = self.get_authorized_client()
-        res = client.post(
+        res = client.open(
             "/scan/s3-object",
+            method=method,
             data=json.dumps({
                 "bucketName": "defense-duriner",
                 "objectVersionId": "abcdef54321wxyz",
@@ -26,10 +30,11 @@ class TestScanS3Object(BaseApplicationTest):
         assert mock_scan_and_tag_s3_object.called is False
 
     @mock.patch("app.main.views.scan.scan_and_tag_s3_object", autospec=True)
-    def test_json_not_obj(self, mock_scan_and_tag_s3_object):
+    def test_json_not_obj(self, mock_scan_and_tag_s3_object, method):
         client = self.get_authorized_client()
-        res = client.post(
+        res = client.open(
             "/scan/s3-object",
+            method=method,
             data=json.dumps(54321),
             content_type="application/json",
         )
@@ -43,10 +48,11 @@ class TestScanS3Object(BaseApplicationTest):
         assert mock_scan_and_tag_s3_object.called is False
 
     @mock.patch("app.main.views.scan.scan_and_tag_s3_object", autospec=True)
-    def test_nonexistent_bucket(self, mock_scan_and_tag_s3_object, s3_mock):
+    def test_nonexistent_bucket(self, mock_scan_and_tag_s3_object, s3_mock, method):
         client = self.get_authorized_client()
-        res = client.post(
+        res = client.open(
             "/scan/s3-object",
+            method=method,
             data=json.dumps({
                 "bucketName": "defense-duriner",
                 "objectKey": "sublime-mason.odt",
@@ -64,10 +70,11 @@ class TestScanS3Object(BaseApplicationTest):
         assert mock_scan_and_tag_s3_object.called is False
 
     @mock.patch("app.main.views.scan.scan_and_tag_s3_object", autospec=True)
-    def test_nonexistent_object(self, mock_scan_and_tag_s3_object, empty_bucket):
+    def test_nonexistent_object(self, mock_scan_and_tag_s3_object, empty_bucket, method):
         client = self.get_authorized_client()
-        res = client.post(
+        res = client.open(
             "/scan/s3-object",
+            method=method,
             data=json.dumps({
                 "bucketName": empty_bucket.name,
                 "objectKey": "sublime-mason.odt",
@@ -85,11 +92,12 @@ class TestScanS3Object(BaseApplicationTest):
         assert mock_scan_and_tag_s3_object.called is False
 
     @mock.patch("app.main.views.scan.scan_and_tag_s3_object", autospec=True)
-    def test_nonexistent_version(self, mock_scan_and_tag_s3_object, bucket_with_file):
+    def test_nonexistent_version(self, mock_scan_and_tag_s3_object, bucket_with_file, method):
         bucket, objver = bucket_with_file
         client = self.get_authorized_client()
-        res = client.post(
+        res = client.open(
             "/scan/s3-object",
+            method=method,
             data=json.dumps({
                 "bucketName": bucket.name,
                 "objectKey": objver.Object().key,
@@ -110,12 +118,13 @@ class TestScanS3Object(BaseApplicationTest):
         assert mock_scan_and_tag_s3_object.called is False
 
     @mock.patch("app.main.views.scan.scan_and_tag_s3_object", autospec=True)
-    def test_correct_passthrough(self, mock_scan_and_tag_s3_object, bucket_with_file):
+    def test_correct_passthrough(self, mock_scan_and_tag_s3_object, bucket_with_file, method):
         bucket, objver = bucket_with_file
         client = self.get_authorized_client()
         mock_scan_and_tag_s3_object.return_value = {"delectable": "swig"}, True, {"gurgling": "noise"}
-        res = client.post(
+        res = client.open(
             "/scan/s3-object",
+            method=method,
             data=json.dumps({
                 "bucketName": bucket.name,
                 "objectKey": objver.Object().key,
