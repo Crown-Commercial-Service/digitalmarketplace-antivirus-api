@@ -1,6 +1,9 @@
+from functools import partial
 import json
 import mock
 
+import boto3
+import botocore
 import pytest
 
 from ..helpers import BaseApplicationTest
@@ -113,6 +116,43 @@ class TestScanS3Object(BaseApplicationTest):
                 "Object with key 'sandman/4321-billy-winks.pdf' and version 'abcdef54321wxyz' not found in "
                 "bucket 'spade'"
             ),
+        }
+
+        assert mock_scan_and_tag_s3_object.called is False
+
+    @mock.patch("app.main.views.scan.scan_and_tag_s3_object", autospec=True)
+    def test_bucket_forbidden(self, mock_scan_and_tag_s3_object, bucket_with_file, method):
+        bucket, objver = bucket_with_file
+
+        unmocked_boto3_client = boto3.client
+
+        with mock.patch("boto3.client", autospec=True) as mock_boto_client:
+            # these tests are run against the aws-mocking library moto so that we can be more certain about exact
+            # behaviours of boto given certain service responses (consider exact contents of exception objects).
+            # currently the only capacity moto seems to have around policing permissions is rejecting anonymous access
+            # so that's what we'll have to use to generate our 403s. wrap the target's boto3.client to inject this
+            # option.
+            mock_boto_client.side_effect = partial(
+                unmocked_boto3_client,
+                config=botocore.client.Config(signature_version=botocore.UNSIGNED),
+            )
+
+            client = self.get_authorized_client()
+            res = client.open(
+                "/scan/s3-object",
+                method=method,
+                data=json.dumps({
+                    "bucketName": bucket.name,
+                    "objectKey": objver.Object().key,
+                    "objectVersionId": objver.id,
+                }),
+                content_type="application/json",
+            )
+
+        assert res.status_code == 400
+        assert res.content_type == "application/json"
+        assert json.loads(res.get_data()) == {
+            "error": "Access to key 'sandman/4321-billy-winks.pdf' version '0' in bucket 'spade' forbidden",
         }
 
         assert mock_scan_and_tag_s3_object.called is False

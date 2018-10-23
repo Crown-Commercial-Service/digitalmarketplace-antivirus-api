@@ -72,6 +72,13 @@ def scan_s3_object(body_dict):
                 f"Object with key {body_dict['objectKey']!r} and version {body_dict['objectVersionId']!r} not found in "
                 f"bucket {body_dict['bucketName']!r}",
             )
+        elif e.response.get("Error", {}).get("Code") == "403":
+            current_app.logger.warn(e)
+            abort(
+                400,
+                f"Access to key {body_dict['objectKey']!r} version {body_dict['objectVersionId']!r} in bucket "
+                f"{body_dict['bucketName']!r} forbidden",
+            )
         # unexpected ClientError, we should probably know about this so re-raise
         raise
 
