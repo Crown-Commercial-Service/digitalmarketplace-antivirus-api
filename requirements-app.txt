@@ -3,6 +3,7 @@
 
 clamd==1.0.2
 Flask==1.0.2
+itsdangerous==0.24
 lxml==4.2.4
 validatesns==0.1.1
 
