@@ -6,5 +6,7 @@ Flask==1.0.2
 itsdangerous==0.24
 lxml==4.2.4
 validatesns==0.1.1
+# Pinned because requests requires <2.8 but earlier dependencies in the list will install 2.8
+idna==2.7
 
 git+https://github.com/alphagov/digitalmarketplace-utils.git@45.1.1#egg=digitalmarketplace-utils==45.1.1
