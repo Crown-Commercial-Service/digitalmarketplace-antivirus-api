@@ -1,10 +1,8 @@
 from flask import Flask
 
-from dmutils import init_app
+from dmutils.flask_init import init_app, api_error_handlers
 
 from config import configs
-
-from app import errors
 
 
 def create_app(config_name):
@@ -14,6 +12,7 @@ def create_app(config_name):
     init_app(
         application,
         configs[config_name],
+        error_handlers=api_error_handlers,
     )
 
     if not application.config['DM_ANTIVIRUS_API_AUTH_TOKENS']:
