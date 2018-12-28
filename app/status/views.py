@@ -1,6 +1,6 @@
 import clamd
 from flask import current_app, request
-from psutil import net_connections, Process
+from psutil import net_connections
 
 from . import status
 from ..clam import get_clamd_socket
@@ -11,25 +11,14 @@ def get_clamd_status():
     """
         This "additional checks" function performs a very relaxed (but fast!) test to get an idea whether the clamd
         server is running or not FSVO "running". By that we mean that there is a process listening on
-        DM_CLAMD_UNIX_SOCKET_PATH and that process is able to respond to signals (not stuck in an "uninterruptible"
-        state). PaaS healthcheck requests have tight time constraints and it would seem that any more thorough clamd
-        status checks can't reliably return within a second.
+        DM_CLAMD_UNIX_SOCKET_PATH. We can't unfortunately find out much more about that process with the permissions
+        that a webserver process has in production.
     """
-    try:
-        pid = next(
-            conn.pid
-            for conn in net_connections(kind="unix")
-            if conn.laddr == current_app.config["DM_CLAMD_UNIX_SOCKET_PATH"]
-        )
-    except StopIteration:
+    if not any(
+        conn.laddr == current_app.config["DM_CLAMD_UNIX_SOCKET_PATH"]
+        for conn in net_connections(kind="unix")
+    ):
         raise StatusError('No connection found matching DM_CLAMD_UNIX_SOCKET_PATH')
-
-    if not pid:
-        # insufficient permissions?
-        raise StatusError("Unable to determine pid of process connected to DM_CLAMD_UNIX_SOCKET_PATH")
-
-    process = Process(pid)
-    process.send_signal(0)
 
     return {
         'clamd': {
