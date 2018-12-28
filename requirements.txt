@@ -7,6 +7,7 @@ Flask==1.0.2
 itsdangerous==0.24
 lxml==4.2.5
 validatesns==0.1.1
+psutil==5.4.8
 # Pinned because requests requires <2.8 but earlier dependencies in the list will install 2.8
 idna==2.7
 
