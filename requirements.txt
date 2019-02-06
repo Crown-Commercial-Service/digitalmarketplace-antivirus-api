@@ -8,8 +8,6 @@ itsdangerous==0.24
 lxml==4.2.5
 validatesns==0.1.1
 psutil==5.4.8
-# Pinned because requests requires <2.8 but earlier dependencies in the list will install 2.8
-idna==2.7
 
 git+https://github.com/alphagov/digitalmarketplace-utils.git@45.2.0#egg=digitalmarketplace-utils==45.2.0
 
@@ -31,20 +29,21 @@ Flask-Script==2.0.6
 Flask-WTF==0.14.2
 fleep==1.0.1
 future==0.17.1
+idna==2.8
 Jinja2==2.10
 jmespath==0.9.3
 mailchimp3==2.0.18
 mandrill==1.0.57
 MarkupSafe==1.1.0
 monotonic==1.5
-notifications-python-client==5.2.0
+notifications-python-client==5.3.0
 odfpy==1.4.0
 oscrypto==0.19.1
 pycparser==2.19
 PyJWT==1.7.1
 python-dateutil==2.7.5
 python-json-logger==0.1.10
-pytz==2018.7
+pytz==2018.9
 requests==2.21.0
 s3transfer==0.1.13
 six==1.12.0
