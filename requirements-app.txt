@@ -8,4 +8,4 @@ lxml==4.2.5
 validatesns==0.1.1
 psutil==5.4.8
 
-git+https://github.com/alphagov/digitalmarketplace-utils.git@46.3.1#egg=digitalmarketplace-utils==46.3.1
+git+https://github.com/alphagov/digitalmarketplace-utils.git@47.1.1#egg=digitalmarketplace-utils==47.1.1
