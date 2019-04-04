@@ -180,20 +180,29 @@ def handle_s3_sns(body_dict):
     )
 
     try:
-        records = json.loads(body_dict["Message"])["Records"]
+        body_message = json.loads(body_dict["Message"])
     except (ValueError, KeyError, TypeError):
         current_app.logger.warning("Message contents didn't match expected format: {message_contents!r}", extra={
             "message_contents": body_dict.get("Message"),
         })
         abort(400, f"Message contents didn't match expected format")
 
-    for record in records:
-        scan_and_tag_s3_object(
-            s3_client=boto3.client("s3", region_name=record["awsRegion"]),
-            s3_bucket_name=record["s3"]["bucket"]["name"],
-            s3_object_key=record["s3"]["object"]["key"],
-            s3_object_version=record["s3"]["object"]["versionId"],
-            sns_message_id=body_dict["MessageId"],
-        )
+    if "Records" in body_message:
+        for record in body_message["Records"]:
+            scan_and_tag_s3_object(
+                s3_client=boto3.client("s3", region_name=record["awsRegion"]),
+                s3_bucket_name=record["s3"]["bucket"]["name"],
+                s3_object_key=record["s3"]["object"]["key"],
+                s3_object_version=record["s3"]["object"]["versionId"],
+                sns_message_id=body_dict["MessageId"],
+            )
+    elif body_message.get("Event") == "s3:TestEvent":
+        # these happen sometimes - amazon keeping us on our toes
+        current_app.logger.info("Received S3 test event")
+    else:
+        current_app.logger.warning("Unrecognized message format {body_message}", extra={
+            "body_message": body_message,
+        })
+        abort(400, f"Unrecognized message format {body_message}")
 
     return jsonify(status="ok"), 200

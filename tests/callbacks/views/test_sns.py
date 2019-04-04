@@ -488,10 +488,38 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                 assert mock_validate.call_args_list == [((weird_body_dict,), AnySupersetOf({}))]
                 assert mock_handle_subscription_confirmation.called is False
 
-    @pytest.mark.parametrize("message", ("mangiD", 123, None, "", "{}",))
+    _test_handle_s3_sns_unexpected_message_contents_didnt_match_log_args = lambda message: (  # noqa
+        (logging.WARNING, AnyStringMatching(r"Message contents didn't match "), ()),
+        AnySupersetOf({"extra": AnySupersetOf({
+            "message_contents": message,
+        })}),
+    )
+    _test_handle_s3_sns_unexpected_message_unrecognized_message_format_log_args = lambda message: (  # noqa
+        (logging.WARNING, AnyStringMatching(r"Unrecognized message format "), ()),
+        AnySupersetOf({"extra": AnySupersetOf({
+            "body_message": message,
+        })}),
+    )
+
+    @pytest.mark.parametrize(
+        "message,expected_warning_log_call",
+        (
+            ("mangiD", _test_handle_s3_sns_unexpected_message_contents_didnt_match_log_args("mangiD"),),
+            (123, _test_handle_s3_sns_unexpected_message_contents_didnt_match_log_args(123),),
+            (None, _test_handle_s3_sns_unexpected_message_contents_didnt_match_log_args(None),),
+            ("", _test_handle_s3_sns_unexpected_message_contents_didnt_match_log_args(""),),
+            ('{"a":"b"}', _test_handle_s3_sns_unexpected_message_unrecognized_message_format_log_args({"a": "b"}),),
+        ),
+    )
     @mock.patch("validatesns.validate", autospec=True)
     @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)
-    def test_handle_s3_sns_unexpected_message(self, mock_handle_subscription_confirmation, mock_validate, message):
+    def test_handle_s3_sns_unexpected_message(
+        self,
+        mock_handle_subscription_confirmation,
+        mock_validate,
+        message,
+        expected_warning_log_call,
+    ):
         with self.mocked_app_logger_log() as mock_app_log:
             with requests_mock.Mocker() as rmock:
                 client = self.get_authorized_client()
@@ -516,13 +544,49 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                             "subscription_arn": "kcirtaP",
                         })}),
                     ),
+                    expected_warning_log_call,
+                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 400})}))
+                ]
+                assert not rmock.request_history
+                assert mock_validate.call_args_list == [((body_dict,), AnySupersetOf({}))]
+                assert mock_handle_subscription_confirmation.called is False
+
+    @mock.patch("validatesns.validate", autospec=True)
+    @mock.patch("app.callbacks.views.sns._handle_subscription_confirmation", autospec=True)
+    def test_handle_s3_sns_test_event(
+        self,
+        mock_handle_subscription_confirmation,
+        mock_validate,
+    ):
+        with self.mocked_app_logger_log() as mock_app_log:
+            with requests_mock.Mocker() as rmock:
+                client = self.get_authorized_client()
+                body_dict = {
+                    "MessageId": "1234321",
+                    "Type": "Notification",
+                    "Message": '{"Event":"s3:TestEvent","nut":"shell"}',
+                }
+                res = client.post(
+                    "/callbacks/sns/s3/uploaded",
+                    data=json.dumps(body_dict),
+                    content_type="application/json",
+                    headers={"X-Amz-Sns-Subscription-Arn": "kcirtaP"},
+                )
+
+                assert res.status_code == 200
+                assert mock_app_log.call_args_list == [
                     (
-                        (logging.WARNING, AnyStringMatching(r"Message contents didn't match "), ()),
+                        (logging.INFO, AnyStringMatching(r"Processing message "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
-                            "message_contents": message,
+                            "message_id": "1234321",
+                            "subscription_arn": "kcirtaP",
                         })}),
                     ),
-                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 400})}))
+                    (
+                        (logging.INFO, "Received S3 test event", ()),
+                        {},
+                    ),
+                    (mock.ANY, AnySupersetOf({"extra": AnySupersetOf({"status": 200})}))
                 ]
                 assert not rmock.request_history
                 assert mock_validate.call_args_list == [((body_dict,), AnySupersetOf({}))]
