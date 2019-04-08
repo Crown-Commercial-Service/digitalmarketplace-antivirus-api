@@ -6,7 +6,12 @@ from app import create_app
 
 class BaseApplicationTest:
     def setup_method(self):
+        self.app_env_var_mock = mock.patch.dict('gds_metrics.os.environ', {'PROMETHEUS_METRICS_PATH': '/_metrics'})
+        self.app_env_var_mock.start()
         self.app = create_app('test')
+
+    def teardown_method(self):
+        self.app_env_var_mock.stop()
 
     def get_authorized_client(self):
         client = self.app.test_client()
