@@ -13,6 +13,7 @@ in (with args; {
     shortName = "dm-av-api";
     buildInputs = [
       pythonPackages.python
+      pkgs.glibcLocales
       pkgs.clamav
       pkgs.libffi
       pkgs.libyaml
