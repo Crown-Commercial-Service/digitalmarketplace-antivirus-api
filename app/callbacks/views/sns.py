@@ -3,6 +3,7 @@ from functools import lru_cache
 import json
 import logging
 import sys
+from urllib.parse import unquote_plus
 
 import boto3
 from flask import abort, jsonify, current_app, request
@@ -192,7 +193,7 @@ def handle_s3_sns(body_dict):
             scan_and_tag_s3_object(
                 s3_client=boto3.client("s3", region_name=record["awsRegion"]),
                 s3_bucket_name=record["s3"]["bucket"]["name"],
-                s3_object_key=record["s3"]["object"]["key"],
+                s3_object_key=unquote_plus(record["s3"]["object"]["key"]),
                 s3_object_version=record["s3"]["object"]["versionId"],
                 sns_message_id=body_dict["MessageId"],
             )
