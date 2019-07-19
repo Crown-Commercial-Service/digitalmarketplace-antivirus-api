@@ -54,7 +54,7 @@ def empty_bucket(request, s3_mock):
 @pytest.fixture
 def bucket_with_file(request, empty_bucket):
     bucket = empty_bucket
-    obj = empty_bucket.Object("sandman/4321-billy-winks.pdf")
+    obj = empty_bucket.Object("sandman/+4321 billy-winks☾.pdf")
     obj.put(
         Body=b"123412341234",
         Metadata={

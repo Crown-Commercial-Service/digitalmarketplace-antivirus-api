@@ -69,7 +69,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -78,7 +78,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         AnySupersetOf({"extra": AnySupersetOf({
                             "av_status": {"avStatus.irrelevant": "who is here"},
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -86,7 +86,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -108,7 +108,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -116,7 +116,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(put object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -124,7 +124,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -162,7 +162,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -171,7 +171,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         AnySupersetOf({"extra": AnySupersetOf({
                             "av_status": {},
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -179,7 +179,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -201,7 +201,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -209,7 +209,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(put object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -217,7 +217,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -232,7 +232,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                             "clamd_output": "FOUND, After him, Garry!",
                             "dm_trace_id": mock.ANY,
                             "file_name": "too ducky.puddeny-pie.pdf",
-                            "object_key": "sandman/4321-billy-winks.pdf",
+                            "object_key": "sandman/+4321 billy-winks☾.pdf",
                             "object_version": "0",
                             "sns_message_id": "<N/A>",
                         },
@@ -270,7 +270,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -279,7 +279,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         AnySupersetOf({"extra": AnySupersetOf({
                             "av_status": {},
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -287,7 +287,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -309,7 +309,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -317,7 +317,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(put object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -325,7 +325,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -340,7 +340,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                             "clamd_output": "FOUND, eicar-test-signature",
                             "dm_trace_id": mock.ANY,
                             "file_name": "too ducky.puddeny-pie.pdf",
-                            "object_key": "sandman/4321-billy-winks.pdf",
+                            "object_key": "sandman/+4321 billy-winks☾.pdf",
                             "object_version": "0",
                             "sns_message_id": "<N/A>",
                         },
@@ -374,7 +374,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -383,7 +383,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         AnySupersetOf({"extra": AnySupersetOf({
                             "av_status": {},
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -391,7 +391,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -407,7 +407,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.INFO, AnyStringMatching(r"Failed handling.*UnknownClamdError.*"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -451,7 +451,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -460,7 +460,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         AnySupersetOf({"extra": AnySupersetOf({
                             "av_status": {},
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -468,7 +468,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -490,7 +490,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -519,7 +519,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -565,7 +565,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -574,7 +574,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         AnySupersetOf({"extra": AnySupersetOf({
                             "av_status": {},
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -582,7 +582,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(initiate object download"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -604,7 +604,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -633,7 +633,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -673,7 +673,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -686,7 +686,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                             },
                             "existing_av_status_result": "pass",
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -694,7 +694,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -732,7 +732,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.DEBUG, AnyStringMatching(r"Call to S3 \(get object tagging"), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -745,7 +745,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                             },
                             "existing_av_status_result": "fail",
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),
@@ -753,7 +753,7 @@ class TestScanAndTagS3Object(BaseApplicationTest):
                         (logging.INFO, AnyStringMatching(r"Handled bucket "), ()),
                         AnySupersetOf({"extra": AnySupersetOf({
                             "s3_bucket_name": "spade",
-                            "s3_object_key": "sandman/4321-billy-winks.pdf",
+                            "s3_object_key": "sandman/+4321 billy-winks☾.pdf",
                             "s3_object_version": "0",
                         })}),
                     ),

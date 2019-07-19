@@ -113,7 +113,7 @@ class TestScanS3Object(BaseApplicationTest):
         assert res.content_type == "application/json"
         assert json.loads(res.get_data()) == {
             "error": (
-                "Object with key 'sandman/4321-billy-winks.pdf' and version 'abcdef54321wxyz' not found in "
+                "Object with key 'sandman/+4321 billy-winks☾.pdf' and version 'abcdef54321wxyz' not found in "
                 "bucket 'spade'"
             ),
         }
@@ -152,7 +152,7 @@ class TestScanS3Object(BaseApplicationTest):
         assert res.status_code == 400
         assert res.content_type == "application/json"
         assert json.loads(res.get_data()) == {
-            "error": "Access to key 'sandman/4321-billy-winks.pdf' version '0' in bucket 'spade' forbidden",
+            "error": "Access to key 'sandman/+4321 billy-winks☾.pdf' version '0' in bucket 'spade' forbidden",
         }
 
         assert mock_scan_and_tag_s3_object.called is False

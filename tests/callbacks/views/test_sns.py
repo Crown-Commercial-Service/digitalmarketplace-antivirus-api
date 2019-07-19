@@ -1,6 +1,7 @@
 from itertools import chain
 import json
 import logging
+from urllib.parse import quote_plus
 
 from freezegun import freeze_time
 from flask.wrappers import Response
@@ -652,7 +653,7 @@ class TestHandleS3Sns(BaseCallbackApplicationTest):
                                     "name": bucket.name,
                                 },
                                 "object": {
-                                    "key": objver.Object().key,
+                                    "key": quote_plus(objver.Object().key),
                                     "versionId": objver.id,
                                 },
                             },
