@@ -10,7 +10,7 @@ RUN echo "deb http://http.debian.net/debian/ stretch main contrib non-free" > /e
         build-essential \
         clamav-daemon=${CLAMAV_VERSION}* \
         clamav-freshclam=${CLAMAV_VERSION}* \
-        libclamunrar7 \
+        libclamunrar9 \
         wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
