@@ -58,14 +58,20 @@ The antivirus API expects to connect to `clamd` over a unix socket. The location
 configuration variable `DM_CLAMD_UNIX_SOCKET_PATH`. The default may be fine if you're running a system `clamd` or the
 docker image.
 
-The antivirus API itself runs on port 5008.
-
 Calls to the antivirus API require a valid bearer
 token. For development environments, this defaults to `myToken`. An example request to your local antivirus API
 would therefore be:
 
 ```
 curl -i -H "Authorization: Bearer myToken" 127.0.0.1:5008/end/point
+```
+
+When using the development server the antivirus API listens on port 5008 by default.
+This can be changed by setting the `DM_ANTIVIRUS_API_PORT` environment
+variable, e.g. to set the antivirus API port number to 9008:
+
+```
+export DM_ANTIVIRUS_API_PORT=9008
 ```
 
 ### Updating application dependencies
