@@ -1,0 +1,5 @@
+DM_ANTIVIRUS_API_PORT=5008
+
+FLASK_APP=application:application
+FLASK_ENV=development
+FLASK_RUN_PORT=${DM_ANTIVIRUS_API_PORT}
