@@ -43,7 +43,7 @@ make run-app
 
 More generally, the command to start the server is:
 ```
-python application.py runserver
+DM_ENVIRONMENT=development flask run
 ```
 
 ### Using the antivirus API locally
