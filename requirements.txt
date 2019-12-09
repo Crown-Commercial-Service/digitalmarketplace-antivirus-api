@@ -9,13 +9,13 @@ lxml==4.2.5
 validatesns==0.1.1
 psutil==5.6.7
 
-git+https://github.com/alphagov/digitalmarketplace-utils.git@50.1.0#egg=digitalmarketplace-utils==50.1.0
+git+https://github.com/alphagov/digitalmarketplace-utils.git@51.0.0#egg=digitalmarketplace-utils==51.0.0
 
 ## The following requirements were added by pip freeze:
 asn1crypto==1.2.0
 blinker==1.4
-boto3==1.10.29
-botocore==1.13.29
+boto3==1.10.34
+botocore==1.13.34
 certifi==2019.11.28
 cffi==1.13.2
 chardet==3.0.4
@@ -23,6 +23,7 @@ Click==7.0
 contextlib2==0.6.0.post1
 cryptography==2.3.1
 defusedxml==0.6.0
+digitalmarketplace-utils==51.0.0
 docopt==0.6.2
 docutils==0.15.2
 Flask-gzip==0.2

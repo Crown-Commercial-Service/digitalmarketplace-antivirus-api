@@ -52,6 +52,6 @@ def get_clamd_status_extended():
 def status():
     return get_app_status(
         ignore_dependencies='ignore-dependencies' in request.args,
-        additional_checks=[get_clamd_status_extended],
-        additional_checks_internal=[get_clamd_status],
+        additional_checks=[get_clamd_status],
+        additional_checks_extended=[get_clamd_status_extended],
     )
