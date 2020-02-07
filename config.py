@@ -25,7 +25,10 @@ class Config:
     # only used as a surrogate where it doesn't actually matter (e.g. for s3)
     DM_DEFAULT_AWS_REGION = "eu-west-1"
 
-    DM_EICAR_TEST_SIGNATURE_RESULT_STRING = "Eicar-Test-Signature"
+    DM_EICAR_TEST_SIGNATURE_RESULT_STRINGS = [
+        "Clamav.Test.File-7",
+        "Eicar-Test-Signature"
+    ]
     DM_EICAR_TEST_SIGNATURE_VIRUS_ALERT_EMAIL = "eicar-found@example.gov.uk"
     DM_DEVELOPER_VIRUS_ALERT_EMAIL = "developer-virus-alert@example.com"
     NOTIFY_TEMPLATES = {
