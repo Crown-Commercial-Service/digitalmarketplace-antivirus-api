@@ -251,7 +251,7 @@ def scan_and_tag_s3_object(
 
             if (
                 len(clamd_result) >= 2 and
-                clamd_result[1].lower() == current_app.config["DM_EICAR_TEST_SIGNATURE_RESULT_STRING"].lower()
+                clamd_result[1].lower() in map(str.lower, current_app.config["DM_EICAR_TEST_SIGNATURE_RESULT_STRINGS"])
             ):
                 notify_kwargs = {
                     # we'll use the s3 ETag of the file as the notify ref - it will be the only piece of information
