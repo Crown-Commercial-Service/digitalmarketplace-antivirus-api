@@ -11,7 +11,7 @@ import pytest
 import requests
 import requests_mock
 import validatesns
-import werkzeug
+from werkzeug.exceptions import BadRequest
 
 from dmtestutils.comparisons import AnySupersetOf, AnyStringMatching, RestrictedAny
 
@@ -221,7 +221,7 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
                     # rmock_response_kwargs
                     {"text": "dummy"},
                     # expected_output
-                    werkzeug.exceptions.BadRequest,
+                    BadRequest,
                     # expect_request_made
                     False,
                     # expected_log_calls
@@ -281,7 +281,7 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
                     # rmock_response_kwargs
                     {"text": "<Second drink<does it<"},
                     # expected_output
-                    werkzeug.exceptions.BadRequest,
+                    BadRequest,
                     # expect_request_made
                     True,
                     # expected_log_calls
@@ -317,7 +317,7 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
                     # rmock_response_kwargs
                     rmock_response_kwargs,
                     # expected_output
-                    werkzeug.exceptions.BadRequest,
+                    BadRequest,
                     # expect_request_made
                     True,
                     # expected_log_calls

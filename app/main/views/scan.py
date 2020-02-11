@@ -73,7 +73,7 @@ def scan_s3_object(body_dict):
                 f"bucket {body_dict['bucketName']!r}",
             )
         elif e.response.get("Error", {}).get("Code") == "403":
-            current_app.logger.warn(e)
+            current_app.logger.warning(e)
             abort(
                 400,
                 f"Access to key {body_dict['objectKey']!r} version {body_dict['objectVersionId']!r} in bucket "
