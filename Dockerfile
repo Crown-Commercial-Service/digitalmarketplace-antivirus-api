@@ -1,4 +1,4 @@
-FROM digitalmarketplace/base-api:9.0.0
+FROM digitalmarketplace/base-api:9.1.0
 
 ENV CLAMAV_VERSION 0.
 
@@ -27,7 +27,8 @@ RUN mkdir /var/run/clamav && \
 RUN sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
     echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
 
-RUN usermod -a -G clamav www-data
+# web server needs access to the clamd socket
+RUN usermod -a -G clamav uwsgi
 
 COPY config/freshclam.conf /etc/clamav
 
