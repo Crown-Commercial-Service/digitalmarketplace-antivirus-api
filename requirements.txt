@@ -9,17 +9,17 @@ lxml==4.5.0
 validatesns==0.1.1
 psutil==5.7.0
 
-git+https://github.com/alphagov/digitalmarketplace-utils.git@51.0.0#egg=digitalmarketplace-utils==51.0.0
+git+https://github.com/alphagov/digitalmarketplace-utils.git@51.6.0#egg=digitalmarketplace-utils==51.6.0
 
 ## The following requirements were added by pip freeze:
 asn1crypto==1.3.0
 blinker==1.4
-boto3==1.12.6
-botocore==1.15.6
+boto3==1.12.18
+botocore==1.15.18
 certifi==2019.11.28
 cffi==1.14.0
 chardet==3.0.4
-Click==7.0
+click==7.1.1
 contextlib2==0.6.0.post1
 cryptography==2.3.1
 defusedxml==0.6.0
@@ -43,7 +43,7 @@ notifications-python-client==5.5.1
 odfpy==1.4.1
 oscrypto==1.2.0
 prometheus-client==0.2.0
-pycparser==2.19
+pycparser==2.20
 PyJWT==1.7.1
 python-dateutil==2.8.1
 python-json-logger==0.1.11
