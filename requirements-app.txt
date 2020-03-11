@@ -2,8 +2,8 @@
 # with package version changes made in requirements-app.txt
 
 clamd==1.0.2
-Flask==1.0.4
-itsdangerous==1.1.0
+Flask==1.0.4  # pyup: >=1.0.4,<1.1.0
+itsdangerous==1.1.0  # pyup: >=1.1.0,<1.2.0
 lxml==4.5.0
 validatesns==0.1.1
 psutil==5.7.0
