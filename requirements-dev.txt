@@ -1,5 +1,3 @@
--r requirements.txt
-
 # For tests
 git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.6.1#egg=digitalmarketplace-test-utils==2.6.1
 coverage==4.4
