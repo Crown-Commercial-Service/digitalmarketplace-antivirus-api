@@ -1,0 +1,18 @@
+-c requirements.txt
+
+pip-tools
+
+# For tests
+git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.6.1#egg=digitalmarketplace-test-utils
+coverage
+flake8
+freezegun
+mock<4.0.0
+moto
+pycodestyle
+pytest-cov
+pytest
+python-coveralls
+python-dotenv  # used to load .flaskenv
+requests-mock
+testfixtures
