@@ -16,7 +16,7 @@ click==7.1.1              # via flask
 contextlib2==0.6.0.post1  # via digitalmarketplace-utils
 cryptography==2.3.1       # via digitalmarketplace-utils
 defusedxml==0.6.0         # via odfpy
-git+https://github.com/alphagov/digitalmarketplace-utils.git@51.6.0#egg=digitalmarketplace-utils  # via -r requirements.in
+git+https://github.com/alphagov/digitalmarketplace-utils.git@51.6.0#egg=digitalmarketplace-utils==51.6.0  # via -r requirements.in
 docopt==0.6.2             # via notifications-python-client
 docutils==0.15.2          # via botocore
 flask-gzip==0.2           # via digitalmarketplace-utils
