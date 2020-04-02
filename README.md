@@ -1,52 +1,30 @@
-# digitalmarketplace-antivirus-api
+# Digital Marketplace Antivirus API
 
-[![Build Status](https://travis-ci.org/alphagov/digitalmarketplace-antivirus-api.svg?branch=master)](https://travis-ci.org/alphagov/digitalmarketplace-antivirus-api)
 [![Coverage Status](https://coveralls.io/repos/alphagov/digitalmarketplace-antivirus-api/badge.svg?branch=master&service=github)](https://coveralls.io/github/alphagov/digitalmarketplace-antivirus-api?branch=master)
-[![Requirements Status](https://requires.io/github/alphagov/digitalmarketplace-antivirus-api/requirements.svg?branch=master)](https://requires.io/github/alphagov/digitalmarketplace-antivirus-api/requirements/?branch=master)
 ![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)
 
-App to scan files in S3 buckets for viruses on demand.
+API application for Digital Marketplace.
 
 - Python app, based on the [Flask framework](http://flask.pocoo.org/)
+
+This app scan files in S3 buckets for viruses on demand.
 
 ## Quickstart
 
 Install [ClamAV](https://www.clamav.net/), specifically its `clamd` tool. This is generally available in most package
 repositories.
 
-Install [Virtualenv](https://virtualenv.pypa.io/en/latest/)
-```
-sudo easy_install virtualenv
-```
-
-### Install/Upgrade dependencies
-
-Install Python dependencies with pip
+You can then clone the repo and run:
 
 ```
-make requirements-dev
+make run-all
 ```
 
-### Run the tests
+This command will install dependencies and start the app.
 
-```
-make test
-```
+By default, the app will be served at [http://127.0.0.1:5008](http://127.0.0.1:5008).
 
-### Run the development server
-
-To run the antivirus api for local development you can use the convenient run
-script, which sets the required environment variables for local development:
-```
-make run-app
-```
-
-More generally, the command to start the server is:
-```
-DM_ENVIRONMENT=development flask run
-```
-
-### Using the antivirus API locally
+### Using the Antivirus API locally
 
 Start `clamd` if not already running (in a new console window/tab):
 
@@ -66,18 +44,30 @@ would therefore be:
 curl -i -H "Authorization: Bearer myToken" 127.0.0.1:5008/end/point
 ```
 
-When using the development server the antivirus API listens on port 5008 by default.
-This can be changed by setting the `DM_ANTIVIRUS_API_PORT` environment
-variable, e.g. to set the antivirus API port number to 9008:
+## Testing
+
+Run the full test suite:
 
 ```
-export DM_ANTIVIRUS_API_PORT=9008
+make test
 ```
 
-### Updating application dependencies
+To only run the Python tests:
 
-`requirements.txt` file is generated from the `requirements-app.txt` in order to pin
-versions of all nested dependecies. If `requirements-app.txt` has been changed (or
+```
+make test-unit
+```
+
+To run the `flake8` linter:
+
+```
+make test-flake8
+```
+
+### Updating Python dependencies
+
+`requirements.txt` file is generated from the `requirements.in` in order to pin
+versions of all nested dependencies. If `requirements.in` has been changed (or
 we want to update the unpinned nested dependencies) `requirements.txt` should be
 regenerated with
 
@@ -85,7 +75,21 @@ regenerated with
 make freeze-requirements
 ```
 
-`requirements.txt` should be committed alongside `requirements-app.txt` changes.
+`requirements.txt` should be committed alongside `requirements.in` changes.
+
+## Contributing
+
+This repository is maintained by the Digital Marketplace team at the [Government Digital Service](https://github.com/alphagov).
+
+If you have a suggestion for improvement, please raise an issue on this repo.
+
+### Reporting Vulnerabilities
+
+If you have discovered a security vulnerability in this code, we appreciate your help in disclosing it to us in a
+responsible manner.
+
+Please follow the [GDS vulnerability reporting steps](https://github.com/alphagov/.github/blob/master/SECURITY.md),
+giving details of any issue you find. Appropriate credit will be given to those reporting confirmed issues.
 
 ## Licence
 
