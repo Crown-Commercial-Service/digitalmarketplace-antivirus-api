@@ -7,6 +7,6 @@ itsdangerous==1.1.0  # pyup: >=1.1.0,<1.2.0
 clamd==1.0.2
 lxml==4.5.2
 validatesns==0.1.1
-psutil==5.7.0
+psutil==5.7.2
 
 git+https://github.com/alphagov/digitalmarketplace-utils.git@52.3.0#egg=digitalmarketplace-utils==52.3.0
