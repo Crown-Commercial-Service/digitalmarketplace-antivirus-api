@@ -61,7 +61,7 @@ responses==0.10.12        # via moto
 s3transfer==0.3.3         # via -c requirements.txt, boto3
 six==1.14.0               # via -c requirements.txt, cryptography, docker, ecdsa, freezegun, mock, moto, packaging, pip-tools, pytest, python-coveralls, python-dateutil, python-jose, requests-mock, responses, websocket-client
 testfixtures==6.0.2       # via -r requirements-dev.in
-urllib3==1.25.8           # via -c requirements.txt, botocore, requests
+urllib3==1.25.10          # via -c requirements.txt, botocore, requests
 wcwidth==0.1.8            # via pytest
 websocket-client==0.57.0  # via docker
 werkzeug==1.0.0           # via -c requirements.txt, moto

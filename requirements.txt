@@ -50,7 +50,7 @@ requests==2.23.0          # via digitalmarketplace-utils, mailchimp3, notificati
 s3transfer==0.3.3         # via boto3
 six==1.14.0               # via cryptography, python-dateutil, validatesns
 unicodecsv==0.14.1        # via digitalmarketplace-utils
-urllib3==1.25.8           # via botocore, requests
+urllib3==1.25.10          # via botocore, requests
 validatesns==0.1.1        # via -r requirements.in
 werkzeug==1.0.0           # via digitalmarketplace-utils, flask
 workdays==1.4             # via digitalmarketplace-utils
