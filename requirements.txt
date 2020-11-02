@@ -31,7 +31,7 @@ idna==2.9                 # via cryptography, requests
 itsdangerous==1.1.0       # via -r requirements.in, flask, flask-wtf
 jinja2==2.11.1            # via flask
 jmespath==0.9.5           # via boto3, botocore
-lxml==4.5.2               # via -r requirements.in
+lxml==4.6.1               # via -r requirements.in
 mailchimp3==3.0.6         # via digitalmarketplace-utils
 markupsafe==1.1.1         # via jinja2
 monotonic==1.5            # via notifications-python-client
