@@ -4,7 +4,6 @@
 #
 #    pip-compile requirements-dev.in
 #
-asn1crypto==1.3.0         # via -c requirements.txt, cryptography
 atomicwrites==1.3.0       # via pytest
 attrs==19.3.0             # via pytest
 aws-xray-sdk==0.95        # via moto
@@ -16,7 +15,7 @@ cffi==1.14.0              # via -c requirements.txt, cryptography
 chardet==3.0.4            # via -c requirements.txt, requests
 click==7.1.1              # via -c requirements.txt, pip-tools
 coverage==4.4             # via -r requirements-dev.in, pytest-cov, python-coveralls
-cryptography==2.3.1       # via -c requirements.txt, moto
+cryptography==3.2.1       # via -c requirements.txt, moto
 git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.6.1#egg=digitalmarketplace-test-utils  # via -r requirements-dev.in
 docker==4.2.0             # via moto
 docutils==0.15.2          # via -c requirements.txt, botocore
@@ -25,7 +24,7 @@ entrypoints==0.3          # via flake8
 flake8==3.7.7             # via -r requirements-dev.in
 freezegun==0.3.10         # via -r requirements-dev.in
 future==0.18.2            # via -c requirements.txt, python-jose
-idna==2.9                 # via -c requirements.txt, cryptography, requests
+idna==2.9                 # via -c requirements.txt, requests
 importlib-metadata==1.5.0  # via pluggy, pytest
 jinja2==2.11.1            # via -c requirements.txt, moto
 jmespath==0.9.5           # via -c requirements.txt, boto3, botocore
