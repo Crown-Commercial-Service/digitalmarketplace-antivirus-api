@@ -47,7 +47,7 @@ cryptography==3.2.1
     # via
     #   -c requirements.txt
     #   moto
-git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.6.1#egg=digitalmarketplace-test-utils==2.6.1
+git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.8.2#egg=digitalmarketplace-test-utils==2.8.2
     # via -r requirements-dev.in
 docker==4.2.0
     # via moto
