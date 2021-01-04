@@ -4,69 +4,211 @@
 #
 #    pip-compile requirements-dev.in
 #
-atomicwrites==1.3.0       # via pytest
-attrs==19.3.0             # via pytest
-aws-xray-sdk==0.95        # via moto
-boto3==1.12.18            # via -c requirements.txt, moto
-boto==2.49.0              # via moto
-botocore==1.15.18         # via -c requirements.txt, boto3, moto, s3transfer
-certifi==2019.11.28       # via -c requirements.txt, requests
-cffi==1.14.0              # via -c requirements.txt, cryptography
-chardet==3.0.4            # via -c requirements.txt, requests
-click==7.1.1              # via -c requirements.txt, pip-tools
-coverage==4.4             # via -r requirements-dev.in, pytest-cov, python-coveralls
-cryptography==3.2.1       # via -c requirements.txt, moto
-git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.6.1#egg=digitalmarketplace-test-utils  # via -r requirements-dev.in
-docker==4.2.0             # via moto
-docutils==0.15.2          # via -c requirements.txt, botocore
-ecdsa==0.15               # via python-jose
-entrypoints==0.3          # via flake8
-flake8==3.7.7             # via -r requirements-dev.in
-freezegun==0.3.10         # via -r requirements-dev.in
-future==0.18.2            # via -c requirements.txt, python-jose
-idna==2.9                 # via -c requirements.txt, requests
-importlib-metadata==1.5.0  # via pluggy, pytest
-jinja2==2.11.1            # via -c requirements.txt, moto
-jmespath==0.9.5           # via -c requirements.txt, boto3, botocore
-jsondiff==1.1.1           # via moto
-jsonpickle==1.3           # via aws-xray-sdk
-markupsafe==1.1.1         # via -c requirements.txt, jinja2
-mccabe==0.6.1             # via flake8
-mock==2.0.0               # via -r requirements-dev.in, moto
-more-itertools==8.2.0     # via pytest
-moto==1.3.7               # via -r requirements-dev.in
-packaging==20.3           # via pytest
-pbr==5.4.4                # via mock
-pip-tools==5.1.0          # via -r requirements-dev.in
-pluggy==0.13.1            # via pytest
-py==1.8.1                 # via pytest
-pyaml==20.3.1             # via moto
-pycodestyle==2.5.0        # via -r requirements-dev.in, flake8
-pycparser==2.20           # via -c requirements.txt, cffi
-pycryptodome==3.9.7       # via python-jose
-pyflakes==2.1.1           # via flake8
-pyparsing==2.4.6          # via packaging
-pytest-cov==2.7.1         # via -r requirements-dev.in
-pytest==4.6.3             # via -r requirements-dev.in, pytest-cov
-python-coveralls==2.9.3   # via -r requirements-dev.in
-python-dateutil==2.8.1    # via -c requirements.txt, botocore, freezegun, moto
-python-dotenv==0.10.3     # via -r requirements-dev.in
-python-jose==2.0.2        # via moto
-pytz==2019.3              # via -c requirements.txt, moto
-pyyaml==5.3.1             # via pyaml, python-coveralls
-requests-mock==1.5.2      # via -r requirements-dev.in
-requests==2.23.0          # via -c requirements.txt, aws-xray-sdk, docker, moto, python-coveralls, requests-mock, responses
-responses==0.10.12        # via moto
-s3transfer==0.3.3         # via -c requirements.txt, boto3
-six==1.14.0               # via -c requirements.txt, cryptography, docker, ecdsa, freezegun, mock, moto, packaging, pip-tools, pytest, python-coveralls, python-dateutil, python-jose, requests-mock, responses, websocket-client
-testfixtures==6.0.2       # via -r requirements-dev.in
-urllib3==1.25.10          # via -c requirements.txt, botocore, requests
-wcwidth==0.1.8            # via pytest
-websocket-client==0.57.0  # via docker
-werkzeug==1.0.0           # via -c requirements.txt, moto
-wrapt==1.12.1             # via aws-xray-sdk
-xmltodict==0.12.0         # via moto
-zipp==3.1.0               # via importlib-metadata
+atomicwrites==1.3.0
+    # via pytest
+attrs==19.3.0
+    # via pytest
+aws-xray-sdk==0.95
+    # via moto
+boto3==1.12.18
+    # via
+    #   -c requirements.txt
+    #   moto
+boto==2.49.0
+    # via moto
+botocore==1.15.18
+    # via
+    #   -c requirements.txt
+    #   boto3
+    #   moto
+    #   s3transfer
+certifi==2019.11.28
+    # via
+    #   -c requirements.txt
+    #   requests
+cffi==1.14.0
+    # via
+    #   -c requirements.txt
+    #   cryptography
+chardet==3.0.4
+    # via
+    #   -c requirements.txt
+    #   requests
+click==7.1.1
+    # via
+    #   -c requirements.txt
+    #   pip-tools
+coverage==4.4
+    # via
+    #   -r requirements-dev.in
+    #   pytest-cov
+    #   python-coveralls
+cryptography==3.2.1
+    # via
+    #   -c requirements.txt
+    #   moto
+digitalmarketplace-test-utils==2.8.2
+    # via -r requirements-dev.in
+docker==4.2.0
+    # via moto
+docutils==0.15.2
+    # via
+    #   -c requirements.txt
+    #   botocore
+ecdsa==0.15
+    # via python-jose
+entrypoints==0.3
+    # via flake8
+flake8==3.7.7
+    # via -r requirements-dev.in
+freezegun==0.3.10
+    # via -r requirements-dev.in
+future==0.18.2
+    # via
+    #   -c requirements.txt
+    #   python-jose
+idna==2.9
+    # via
+    #   -c requirements.txt
+    #   requests
+importlib-metadata==1.5.0
+    # via
+    #   pluggy
+    #   pytest
+jinja2==2.11.1
+    # via
+    #   -c requirements.txt
+    #   moto
+jmespath==0.9.5
+    # via
+    #   -c requirements.txt
+    #   boto3
+    #   botocore
+jsondiff==1.1.1
+    # via moto
+jsonpickle==1.3
+    # via aws-xray-sdk
+markupsafe==1.1.1
+    # via
+    #   -c requirements.txt
+    #   jinja2
+mccabe==0.6.1
+    # via flake8
+mock==2.0.0
+    # via
+    #   -r requirements-dev.in
+    #   moto
+more-itertools==8.2.0
+    # via pytest
+moto==1.3.7
+    # via -r requirements-dev.in
+packaging==20.3
+    # via pytest
+pbr==5.4.4
+    # via mock
+pip-tools==5.5.0
+    # via -r requirements-dev.in
+pluggy==0.13.1
+    # via pytest
+py==1.8.1
+    # via pytest
+pyaml==20.3.1
+    # via moto
+pycodestyle==2.5.0
+    # via
+    #   -r requirements-dev.in
+    #   flake8
+pycparser==2.20
+    # via
+    #   -c requirements.txt
+    #   cffi
+pycryptodome==3.9.7
+    # via python-jose
+pyflakes==2.1.1
+    # via flake8
+pyparsing==2.4.6
+    # via packaging
+pytest-cov==2.7.1
+    # via -r requirements-dev.in
+pytest==4.6.3
+    # via
+    #   -r requirements-dev.in
+    #   pytest-cov
+python-coveralls==2.9.3
+    # via -r requirements-dev.in
+python-dateutil==2.8.1
+    # via
+    #   -c requirements.txt
+    #   botocore
+    #   freezegun
+    #   moto
+python-dotenv==0.10.3
+    # via -r requirements-dev.in
+python-jose==2.0.2
+    # via moto
+pytz==2019.3
+    # via
+    #   -c requirements.txt
+    #   moto
+pyyaml==5.3.1
+    # via
+    #   pyaml
+    #   python-coveralls
+requests-mock==1.5.2
+    # via -r requirements-dev.in
+requests==2.23.0
+    # via
+    #   -c requirements.txt
+    #   aws-xray-sdk
+    #   docker
+    #   moto
+    #   python-coveralls
+    #   requests-mock
+    #   responses
+responses==0.10.12
+    # via moto
+s3transfer==0.3.3
+    # via
+    #   -c requirements.txt
+    #   boto3
+six==1.14.0
+    # via
+    #   -c requirements.txt
+    #   cryptography
+    #   docker
+    #   ecdsa
+    #   freezegun
+    #   mock
+    #   moto
+    #   packaging
+    #   pytest
+    #   python-coveralls
+    #   python-dateutil
+    #   python-jose
+    #   requests-mock
+    #   responses
+    #   websocket-client
+testfixtures==6.0.2
+    # via -r requirements-dev.in
+urllib3==1.25.10
+    # via
+    #   -c requirements.txt
+    #   botocore
+    #   requests
+wcwidth==0.1.8
+    # via pytest
+websocket-client==0.57.0
+    # via docker
+werkzeug==1.0.0
+    # via
+    #   -c requirements.txt
+    #   moto
+wrapt==1.12.1
+    # via aws-xray-sdk
+xmltodict==0.12.0
+    # via moto
+zipp==3.1.0
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
