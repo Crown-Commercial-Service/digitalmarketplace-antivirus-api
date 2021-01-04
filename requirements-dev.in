@@ -2,8 +2,6 @@
 
 pip-tools>5.0.0
 
-# For tests
-git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.8.2#egg=digitalmarketplace-test-utils==2.8.2
 coverage
 flake8
 freezegun
@@ -16,3 +14,5 @@ python-coveralls
 python-dotenv  # used to load .flaskenv
 requests-mock
 testfixtures
+
+digitalmarketplace-test-utils
