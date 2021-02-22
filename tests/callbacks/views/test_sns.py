@@ -5,7 +5,7 @@ from urllib.parse import quote_plus
 
 from freezegun import freeze_time
 from flask.wrappers import Response
-from lxml.etree import ParseError
+from defusedxml.ElementTree import ParseError
 import mock
 import pytest
 import requests

@@ -7,7 +7,7 @@ from urllib.parse import unquote_plus
 
 import boto3
 from flask import abort, jsonify, current_app, request
-from lxml.etree import fromstring as etree_fromstring, ParseError
+from defusedxml.ElementTree import fromstring as etree_fromstring, ParseError
 import requests
 
 import validatesns
@@ -84,18 +84,31 @@ def _handle_subscription_confirmation(body_json, supported_topic_name):
     try:
         confirmation_etree = etree_fromstring(confirmation_response.content)
         # though the xml is (hopefully) supplied with an xmlns, we want to be quite lenient with what we accept. but
-        # lxml/xpath doesn't like us omitting the namespace if one is specified, so I'm simply assigning the toplevel
-        # namespace (.nsmap(None)) to a short label `n` to allow us to specify xpath expressions with as much brevity
-        # as possible.
-        namespaces = {"n": confirmation_etree.nsmap[None]}
-        subscription_arn = confirmation_etree.xpath(
-            "normalize-space(string(/n:ConfirmSubscriptionResponse/n:ConfirmSubscriptionResult/n:SubscriptionArn))",
-            namespaces=namespaces,
-        )
-        confirmation_request_id = confirmation_etree.xpath(
-            "normalize-space(string(/n:ConfirmSubscriptionResponse/n:ResponseMetadata/n:RequestId))",
-            namespaces=namespaces,
-        )
+        # lxml/xpath doesn't like us omitting the namespace if one is specified. defusedxml doesn't provide an API to
+        # get the namespace of an element, but if there is one it appears in the string representation of the element.
+        # If a namespace is set, extract it from the element and add it into the search path.
+
+        etree_str = str(confirmation_etree)
+        if "{" in etree_str and "}" in etree_str:
+            namespace = etree_str[etree_str.find("{"):etree_str.find("}") + 1]
+        else:
+            namespace = ""
+
+        # Element.find() returns None if there's no match, but we want to return an empty string
+        try:
+            subscription_arn = confirmation_etree.find(
+                f".//{namespace}ConfirmSubscriptionResult/{namespace}SubscriptionArn"
+            ).text.strip()
+        except AttributeError:
+            subscription_arn = ""
+
+        try:
+            confirmation_request_id = confirmation_etree.find(
+                f".//{namespace}ResponseMetadata/{namespace}RequestId",
+            ).text.strip()
+        except AttributeError:
+            confirmation_request_id = ""
+
     except ParseError as e:
         current_app.logger.warning(e)
 
