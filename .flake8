@@ -14,3 +14,4 @@ per-file-ignores =
     app/callbacks/__init__.py : E402, F401
     app/main/__init__.py : E402, F401
     app/status/__init__.py : E402, F401
+    tasks.py: F401
