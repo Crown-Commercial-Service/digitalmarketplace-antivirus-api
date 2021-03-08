@@ -15,10 +15,9 @@ RUN echo "deb http://http.debian.net/debian/ buster main contrib non-free" > /et
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget -O /var/lib/clamav/main.cvd http://database.clamav.net/main.cvd && \
-    wget -O /var/lib/clamav/daily.cvd http://database.clamav.net/daily.cvd && \
-    wget -O /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
-    chown clamav:clamav /var/lib/clamav/*.cvd
+COPY config/freshclam.conf /etc/clamav
+
+RUN freshclam
 
 RUN mkdir /var/run/clamav && \
     chown clamav:clamav /var/run/clamav && \
@@ -29,8 +28,6 @@ RUN sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
 
 # web server needs access to the clamd socket
 RUN usermod -a -G clamav uwsgi
-
-COPY config/freshclam.conf /etc/clamav
 
 COPY config/additional-supervisord.conf /home/vcap/additional-supervisord.conf
 RUN cat /home/vcap/additional-supervisord.conf >> /etc/supervisord.conf
