@@ -7,6 +7,6 @@ itsdangerous==1.1.0  # pyup: >=1.1.0,<1.2.0
 clamd==1.0.2
 validatesns==0.1.1
 psutil==5.8.0
-defusedxml==0.6.0
+defusedxml==0.7.1
 
 digitalmarketplace-utils
