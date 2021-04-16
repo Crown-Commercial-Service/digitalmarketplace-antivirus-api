@@ -28,7 +28,7 @@ click==7.1.1
     # via flask
 contextlib2==0.6.0.post1
     # via digitalmarketplace-utils
-cryptography==3.2.1
+cryptography==3.4.7
     # via digitalmarketplace-utils
 defusedxml==0.7.1
     # via
@@ -115,7 +115,6 @@ s3transfer==0.3.3
     # via boto3
 six==1.14.0
     # via
-    #   cryptography
     #   python-dateutil
     #   validatesns
 unicodecsv==0.14.1

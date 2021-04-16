@@ -38,7 +38,7 @@ click==7.1.1
     # via
     #   -c requirements.txt
     #   pip-tools
-cryptography==3.2.1
+cryptography==3.4.7
     # via
     #   -c requirements.txt
     #   moto
@@ -160,7 +160,6 @@ s3transfer==0.3.3
 six==1.14.0
     # via
     #   -c requirements.txt
-    #   cryptography
     #   docker
     #   ecdsa
     #   freezegun
