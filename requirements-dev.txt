@@ -68,6 +68,7 @@ idna==2.9
     #   requests
 importlib-metadata==1.5.0
     # via
+    #   pep517
     #   pluggy
     #   pytest
 jinja2==2.11.3
@@ -101,7 +102,9 @@ packaging==20.3
     # via pytest
 pbr==5.4.4
     # via mock
-pip-tools==5.5.0
+pep517==0.10.0
+    # via pip-tools
+pip-tools==6.1.0
     # via -r requirements-dev.in
 pluggy==0.13.1
     # via pytest
@@ -174,6 +177,8 @@ six==1.14.0
     #   websocket-client
 testfixtures==6.0.2
     # via -r requirements-dev.in
+toml==0.10.2
+    # via pep517
 urllib3==1.25.10
     # via
     #   -c requirements.txt
@@ -192,7 +197,9 @@ wrapt==1.12.1
 xmltodict==0.12.0
     # via moto
 zipp==3.1.0
-    # via importlib-metadata
+    # via
+    #   importlib-metadata
+    #   pep517
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
