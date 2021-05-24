@@ -2,7 +2,7 @@
 # with package version changes made in requirements.in
 
 Flask==1.0.4         # pyup: >=1.0.4,<1.1.0
-itsdangerous==1.1.0  # pyup: >=1.1.0,<1.2.0
+itsdangerous==2.0.1  # pyup: >=1.1.0,<1.2.0
 
 clamd==1.0.2
 validatesns==0.1.1
