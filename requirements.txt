@@ -34,7 +34,7 @@ defusedxml==0.7.1
     # via
     #   -r requirements.in
     #   odfpy
-digitalmarketplace-utils==58.1.0
+digitalmarketplace-utils==59.0.0
     # via -r requirements.in
 docopt==0.6.2
     # via notifications-python-client
@@ -48,7 +48,7 @@ flask-session==0.3.2
     # via digitalmarketplace-utils
 flask-wtf==0.14.3
     # via digitalmarketplace-utils
-flask==1.0.4
+flask==1.1.4
     # via
     #   -r requirements.in
     #   digitalmarketplace-utils
@@ -67,7 +67,7 @@ govuk-country-register==0.5.0
     # via digitalmarketplace-utils
 idna==2.9
     # via requests
-itsdangerous==2.0.1
+itsdangerous==1.1.0
     # via
     #   -r requirements.in
     #   flask
@@ -126,9 +126,7 @@ urllib3==1.25.10
 validatesns==0.1.1
     # via -r requirements.in
 werkzeug==1.0.0
-    # via
-    #   digitalmarketplace-utils
-    #   flask
+    # via flask
 workdays==1.4
     # via digitalmarketplace-utils
 wtforms==2.2.1
