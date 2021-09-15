@@ -10,13 +10,13 @@ attrs==19.3.0
     # via pytest
 aws-xray-sdk==0.95
     # via moto
-boto3==1.12.18
+boto3==1.18.42
     # via
     #   -c requirements.txt
     #   moto
 boto==2.49.0
     # via moto
-botocore==1.15.18
+botocore==1.21.42
     # via
     #   -c requirements.txt
     #   boto3
@@ -30,7 +30,7 @@ cffi==1.14.0
     # via
     #   -c requirements.txt
     #   cryptography
-chardet==3.0.4
+charset-normalizer==2.0.5
     # via
     #   -c requirements.txt
     #   requests
@@ -46,10 +46,6 @@ digitalmarketplace-test-utils==2.8.2
     # via -r requirements-dev.in
 docker==4.2.0
     # via moto
-docutils==0.15.2
-    # via
-    #   -c requirements.txt
-    #   botocore
 ecdsa==0.15
     # via python-jose
 entrypoints==0.3
@@ -67,7 +63,10 @@ idna==2.9
     #   -c requirements.txt
     #   requests
 importlib-metadata==1.5.0
-    # via pytest
+    # via
+    #   pep517
+    #   pluggy
+    #   pytest
 jinja2==2.11.3
     # via
     #   -c requirements.txt
@@ -143,7 +142,7 @@ pyyaml==5.4
     # via pyaml
 requests-mock==1.5.2
     # via -r requirements-dev.in
-requests==2.23.0
+requests==2.26.0
     # via
     #   -c requirements.txt
     #   aws-xray-sdk
@@ -153,7 +152,7 @@ requests==2.23.0
     #   responses
 responses==0.10.12
     # via moto
-s3transfer==0.3.3
+s3transfer==0.5.0
     # via
     #   -c requirements.txt
     #   boto3
@@ -176,7 +175,7 @@ testfixtures==6.0.2
     # via -r requirements-dev.in
 toml==0.10.2
     # via pep517
-urllib3==1.25.10
+urllib3==1.26.6
     # via
     #   -c requirements.txt
     #   botocore
@@ -194,7 +193,9 @@ wrapt==1.12.1
 xmltodict==0.12.0
     # via moto
 zipp==3.1.0
-    # via importlib-metadata
+    # via
+    #   importlib-metadata
+    #   pep517
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
