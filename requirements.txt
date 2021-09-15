@@ -129,5 +129,5 @@ werkzeug==1.0.0
     # via flask
 workdays==1.4
     # via digitalmarketplace-utils
-wtforms==2.2.1
+wtforms==3.0.0a1
     # via flask-wtf
