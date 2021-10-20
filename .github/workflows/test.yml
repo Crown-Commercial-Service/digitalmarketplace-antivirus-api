@@ -9,6 +9,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Build Dockerfile
+      run: docker build .
+
     - name: Setup python (${{ matrix.python-version }})
       uses: actions/setup-python@v2
       with:
