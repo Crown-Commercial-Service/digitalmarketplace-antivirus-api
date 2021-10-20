@@ -9,6 +9,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v10.1
+
+    - name: Build Dockerfile
+      if: contains(steps.changed-files.outputs.modified_files, 'Dockerfile')
+      run: docker build .
+
     - name: Setup python (${{ matrix.python-version }})
       uses: actions/setup-python@v2
       with:
