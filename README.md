@@ -77,7 +77,7 @@ make freeze-requirements
 
 ## Contributing
 
-This repository is maintained by the Digital Marketplace team at the [Government Digital Service](https://github.com/alphagov).
+This repository is maintained by the Digital Marketplace team at the [Crown Commercial Service](https://github.com/Crown-Commercial-Service).
 
 If you have a suggestion for improvement, please raise an issue on this repo.
 
@@ -86,7 +86,7 @@ If you have a suggestion for improvement, please raise an issue on this repo.
 If you have discovered a security vulnerability in this code, we appreciate your help in disclosing it to us in a
 responsible manner.
 
-Please follow the [GDS vulnerability reporting steps](https://github.com/alphagov/.github/blob/master/SECURITY.md),
+Please follow the [CCS vulnerability reporting steps](https://www.crowncommercial.gov.uk/about-ccs/vulnerability-disclosure-policy/),
 giving details of any issue you find. Appropriate credit will be given to those reporting confirmed issues.
 
 ## Licence
