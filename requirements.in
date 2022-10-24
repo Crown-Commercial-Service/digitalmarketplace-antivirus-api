@@ -6,7 +6,7 @@ itsdangerous
 
 clamd==1.0.2
 validatesns==0.1.1
-psutil==5.9.2
+psutil==5.9.3
 defusedxml==0.7.1
 
 digitalmarketplace-utils
