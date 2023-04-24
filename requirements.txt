@@ -86,7 +86,7 @@ oscrypto==1.2.0
     # via validatesns
 prometheus-client==0.2.0
     # via gds-metrics
-psutil==5.9.4
+psutil==5.9.5
     # via -r requirements.in
 pycparser==2.20
     # via cffi
