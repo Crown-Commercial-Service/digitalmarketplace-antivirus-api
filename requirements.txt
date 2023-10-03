@@ -113,7 +113,7 @@ six==1.14.0
     #   validatesns
 unicodecsv==0.14.1
     # via digitalmarketplace-utils
-urllib3==1.26.6
+urllib3==1.26.17
     # via
     #   botocore
     #   requests
