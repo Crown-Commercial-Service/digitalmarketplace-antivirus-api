@@ -181,7 +181,7 @@ wcwidth==0.1.8
     # via pytest
 websocket-client==0.57.0
     # via docker
-werkzeug==1.0.0
+werkzeug==3.0.1
     # via
     #   -c requirements.txt
     #   moto
