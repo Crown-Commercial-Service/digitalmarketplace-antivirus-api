@@ -61,6 +61,12 @@ class Development(Config):
     DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = base64.standard_b64encode(b'my:callbackToken').decode("ascii")
 
 
+class NativeAWS(Config):
+    DEBUG = False
+    DM_APP_NAME = 'antivirus-api'
+    DM_HTTP_PROTO = 'https'
+
+
 class Live(Config):
     """Base config for deployed environments"""
     DEBUG = False
@@ -89,6 +95,7 @@ class Production(Live):
 
 configs = {
     'development': Development,
+    'native-aws': NativeAWS,
     'test': Test,
 
     'preview': Preview,
