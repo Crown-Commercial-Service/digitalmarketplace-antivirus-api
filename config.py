@@ -66,6 +66,7 @@ class NativeAWS(Config):
     DM_APP_NAME = 'antivirus-api'
     DM_HTTP_PROTO = 'https'
 
+
 class Live(Config):
     """Base config for deployed environments"""
     DEBUG = False
