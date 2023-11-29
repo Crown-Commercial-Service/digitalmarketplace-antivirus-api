@@ -61,17 +61,10 @@ class Development(Config):
     DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = base64.standard_b64encode(b'my:callbackToken').decode("ascii")
 
 
-class NativeAWS(Config):
-    DEBUG = False
-    DM_APP_NAME = 'antivirus-api'
-    DM_HTTP_PROTO = 'https'
-
-
-class Live(Config):
-    """Base config for deployed environments"""
+class SharedLive(Config):
+    """Base config for deployed environments shared between GPaaS and AWS"""
     DEBUG = False
     DM_HTTP_PROTO = 'https'
-    DM_LOG_PATH = '/var/log/digitalmarketplace/application.log'
 
     # use of invalid email addresses with live api keys annoys Notify
     DM_NOTIFY_REDIRECT_DOMAINS_TO_ADDRESS = {
@@ -79,6 +72,16 @@ class Live(Config):
         "example.gov.uk": "success@simulator.amazonses.com",
         "user.marketplace.team": "success@simulator.amazonses.com",
     }
+
+
+class NativeAWS(SharedLive):
+    DM_CLAMD_UNIX_SOCKET_PATH = "127.0.0.1:3310"
+    DM_APP_NAME = 'antivirus-api'
+
+
+class Live(SharedLive):
+    """Base config for deployed environments"""
+    DM_HTTP_PROTO = 'https'
 
 
 class Preview(Live):
