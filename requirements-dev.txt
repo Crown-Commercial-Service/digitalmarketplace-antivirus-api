@@ -135,7 +135,7 @@ pytz==2019.3
     # via
     #   -c requirements.txt
     #   moto
-pyyaml==5.4
+pyyaml==6.0.1
     # via pyaml
 requests-mock==1.5.2
     # via -r requirements-dev.in
