@@ -34,7 +34,7 @@ defusedxml==0.7.1
     # via
     #   -r requirements.in
     #   odfpy
-digitalmarketplace-utils==60.11.0
+digitalmarketplace-utils==60.12.0
     # via -r requirements.in
 docopt==0.6.2
     # via notifications-python-client
