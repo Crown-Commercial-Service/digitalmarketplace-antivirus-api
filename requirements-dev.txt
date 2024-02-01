@@ -113,7 +113,7 @@ pycparser==2.20
     # via
     #   -c requirements.txt
     #   cffi
-pycryptodome==3.9.7
+pycryptodome==3.19.1
     # via python-jose
 pyflakes==2.1.1
     # via flake8
