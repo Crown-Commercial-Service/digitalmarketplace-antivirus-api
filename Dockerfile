@@ -1,4 +1,4 @@
-FROM digitalmarketplace/base-api:12.0.1
+FROM digitalmarketplace/base-api:14.0.0
 
 ENV CLAMAV_VERSION 0.
 
