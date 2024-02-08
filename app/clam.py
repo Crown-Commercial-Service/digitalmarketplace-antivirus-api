@@ -8,6 +8,9 @@ import clamd
 # mocker instead targets _get_clamd_socket_inner, it should be able to catch all calls thereor as it's only ever
 # accessed as a module-local reference
 def _get_clamd_socket_inner():
+    if clamd_net_addr := current_app.config.get("DM_CLAMD_NET_ADDR"):
+        clamd_host, clamd_port = clamd_net_addr
+        return clamd.ClamdNetworkSocket(host=clamd_host, port=clamd_port)
     return clamd.ClamdUnixSocket(path=current_app.config["DM_CLAMD_UNIX_SOCKET_PATH"])
 
 

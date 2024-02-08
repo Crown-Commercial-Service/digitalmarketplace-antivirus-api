@@ -8,6 +8,27 @@ from dmutils.status import get_app_status, StatusError
 
 
 def get_clamd_status():
+    if clamd_net_addr := current_app.config.get("DM_CLAMD_NET_ADDR"):
+        _check_net_clamd_status(clamd_net_addr)
+    else:
+        _check_socket_clamd_status(current_app.config["DM_CLAMD_UNIX_SOCKET_PATH"])
+
+    return {
+        'clamd': {
+            'process': 'alive',
+        },
+    }
+
+
+def _check_net_clamd_status(net_addr):
+    if not any(
+            conn.raddr == net_addr
+            for conn in net_connections(kind="inet4")
+    ):
+        raise StatusError(f'No connection found matching ${net_addr}')
+
+
+def _check_socket_clamd_status(socket_path):
     """
         This "additional checks" function performs a very relaxed (but fast!) test to get an idea whether the clamd
         server is running or not FSVO "running". By that we mean that there is a process listening on
@@ -15,16 +36,10 @@ def get_clamd_status():
         that a webserver process has in production.
     """
     if not any(
-        conn.laddr == current_app.config["DM_CLAMD_UNIX_SOCKET_PATH"]
-        for conn in net_connections(kind="unix")
+            conn.laddr == socket_path
+            for conn in net_connections(kind="unix")
     ):
-        raise StatusError('No connection found matching DM_CLAMD_UNIX_SOCKET_PATH')
-
-    return {
-        'clamd': {
-            'process': 'alive',
-        },
-    }
+        raise StatusError(f'No connection found matching ${socket_path}')
 
 
 def get_clamd_status_extended():
