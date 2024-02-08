@@ -75,7 +75,8 @@ class SharedLive(Config):
 
 
 class NativeAWS(SharedLive):
-    DM_CLAMD_UNIX_SOCKET_PATH = "127.0.0.1:3310"
+    DM_CLAMD_NET_ADDR = ("127.0.0.1", 3310)
+    DM_CLAMD_UNIX_SOCKET_PATH = None
     DM_APP_NAME = 'antivirus-api'
 
 

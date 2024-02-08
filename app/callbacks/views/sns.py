@@ -199,7 +199,7 @@ def handle_s3_sns(body_dict):
         current_app.logger.warning("Message contents didn't match expected format: {message_contents!r}", extra={
             "message_contents": body_dict.get("Message"),
         })
-        abort(400, f"Message contents didn't match expected format")
+        abort(400, "Message contents didn't match expected format")
 
     if "Records" in body_message:
         for record in body_message["Records"]:

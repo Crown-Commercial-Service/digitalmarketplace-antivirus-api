@@ -175,11 +175,11 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
             (
                 (
                     # body_dict
-                    {"SubscribeURL": "https://amz.net", "TopicArn": f"arn:aws:sns:howth-west-2:123456789012:Drawers"},
+                    {"SubscribeURL": "https://amz.net", "TopicArn": "arn:aws:sns:howth-west-2:123456789012:Drawers"},
                     # supported_topic_name
                     "Drawers",
                     # rmock_response_kwargs
-                    {"text": f"""<ConfirmSubscriptionResponse xmlns="http://brazenfaced.things">
+                    {"text": """<ConfirmSubscriptionResponse xmlns="http://brazenfaced.things">
                         <ConfirmSubscriptionResult><SubscriptionArn>
                             arn:aws:sns:howth-west-2:123456789012:Drawers:bicycles
                         </SubscriptionArn></ConfirmSubscriptionResult>
@@ -198,7 +198,7 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
                             AnySupersetOf({
                                 "extra": AnySupersetOf({
                                     "target_url": "https://amz.net",
-                                    "topic_arn": f"arn:aws:sns:howth-west-2:123456789012:Drawers",
+                                    "topic_arn": "arn:aws:sns:howth-west-2:123456789012:Drawers",
                                 }),
                             }),
                         ),
@@ -206,7 +206,7 @@ class TestHandleSubscriptionConfirmation(BaseCallbackApplicationTest):
                             (logging.INFO, AnyStringMatching("SubscriptionConfirmation succeeded "), ()),
                             AnySupersetOf({
                                 "extra": AnySupersetOf({
-                                    "subscription_arn": f"arn:aws:sns:howth-west-2:123456789012:Drawers:bicycles",
+                                    "subscription_arn": "arn:aws:sns:howth-west-2:123456789012:Drawers:bicycles",
                                     "confirmation_request_id": "always-skeezing",
                                 }),
                             }),
