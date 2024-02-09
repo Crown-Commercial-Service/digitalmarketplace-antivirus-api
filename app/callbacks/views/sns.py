@@ -172,7 +172,9 @@ def handle_s3_sns(body_dict):
         })
         abort(400, "SNS request body failed signature validation")
 
-    supported_topic_name = f"s3_file_upload_notification_{current_app.config['DM_ENVIRONMENT']}"
+    supported_topic_name = current_app.config.get(
+        "DM_CALLBACK_TOPIC_NAME"
+    ) or f"s3_file_upload_notification_{current_app.config['DM_ENVIRONMENT']}"
 
     if body_dict["Type"] == "SubscriptionConfirmation":
         # SNS starts out sending us a SubscriptionConfirmation message when the Topic is initially subscribed to an URL.
