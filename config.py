@@ -10,6 +10,7 @@ class Config:
     )
     DM_ANTIVIRUS_API_AUTH_TOKENS = None
     DM_ANTIVIRUS_API_CALLBACK_AUTH_TOKENS = None
+    DM_CALLBACK_TOPIC_NAME = None
     AUTH_REQUIRED = True
     DM_HTTP_PROTO = 'http'
     # Logging
