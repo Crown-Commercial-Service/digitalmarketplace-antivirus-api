@@ -30,6 +30,7 @@ class Config:
         "Clamav.Test.File-7",
         "Eicar-Test-Signature",
         "Eicar-Test-Signature.UNOFFICIAL",  # if from our custom virus definition
+        "Eicar-Signature",
     ]
     DM_EICAR_TEST_SIGNATURE_VIRUS_ALERT_EMAIL = "eicar-found@example.gov.uk"
     DM_DEVELOPER_VIRUS_ALERT_EMAIL = "developer-virus-alert@example.com"
