@@ -54,7 +54,7 @@ freezegun==0.3.10
     # via -r requirements-dev.in
 future==0.18.2
     # via python-jose
-idna==2.9
+idna==3.7
     # via
     #   -c requirements.txt
     #   requests
