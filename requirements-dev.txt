@@ -125,7 +125,7 @@ python-dateutil==2.8.1
     #   moto
 python-dotenv==0.10.3
     # via -r requirements-dev.in
-python-jose==2.0.2
+python-jose==3.4.0
     # via moto
 pytz==2019.3
     # via
