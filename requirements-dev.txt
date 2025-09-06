@@ -183,7 +183,7 @@ werkzeug==1.0.0
     #   moto
 wrapt==1.12.1
     # via aws-xray-sdk
-xmltodict==0.12.0
+xmltodict==0.15.0
     # via moto
 zipp==3.1.0
     # via importlib-metadata
