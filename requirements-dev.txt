@@ -46,7 +46,7 @@ digitalmarketplace-test-utils==2.8.2
     # via -r requirements-dev.in
 docker==4.2.0
     # via moto
-ecdsa==0.15
+ecdsa==0.19.2
     # via python-jose
 flake8==7.0.0
     # via -r requirements-dev.in
